@@ -6,6 +6,30 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>Assets\favicon.ico</ApplicationIcon>
+    <Title>OkSaturate</Title>
+    <Version>1.0.0</Version>
+    <Authors>GarthTB | 天卜 &lt;g-art-h@outlook.com&gt;</Authors>
+    <Company>GarthTB | 天卜 &lt;g-art-h@outlook.com&gt;</Company>
+    <Product>OkSaturate</Product>
+    <Description>A Windows GUI application for adjusting image vibrance in multiple color spaces | 用于在多种色彩空间中调整图像饱和度的 Windows GUI 应用程序</Description>
+    <Copyright>Copyright (c) 2025 GarthTB | 天卜</Copyright>
+    <RepositoryUrl>https://github.com/GarthTB/OkSaturate</RepositoryUrl>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE" />
+    <None Include="..\README.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.11" />
+    <PackageReference Include="Wacton.Unicolour" Version="6.2.0" />
+  </ItemGroup>
 
 </Project>
