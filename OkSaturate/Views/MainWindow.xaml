@@ -5,8 +5,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:OkSaturate.ViewModels"
-    Width="700"
-    Height="432"
+    Width="740"
+    Height="460"
     mc:Ignorable="d"
     AllowDrop="True"
     d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
@@ -25,7 +25,9 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="14*" />
                 <RowDefinition Height="5*" />
-                <RowDefinition Height="88*" />
+                <RowDefinition Height="80*" />
+                <RowDefinition Height="5*" />
+                <RowDefinition Height="14*" />
                 <RowDefinition Height="5*" />
                 <RowDefinition Height="14*" />
                 <RowDefinition Height="5*" />
@@ -65,7 +67,7 @@
                     Grid.Column="2"
                     VerticalContentAlignment="Center"
                     ItemsSource="{Binding ColourSpaceNames}"
-                    Padding="6,0"
+                    Padding="10,0"
                     SelectedIndex="{Binding SelectedColourSpaceIndex}" />
             </Grid>
             <Grid Grid.Row="6">
@@ -108,14 +110,30 @@
                 TickPlacement="TopLeft" />
             <Grid Grid.Row="10">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="92" />
+                    <ColumnDefinition Width="70" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Label
+                    VerticalContentAlignment="Center"
+                    Content="保存格式"
+                    Padding="2,0,0,0" />
+                <ComboBox
+                    Grid.Column="2"
+                    VerticalContentAlignment="Center"
+                    ItemsSource="{Binding SaveFormatNames}"
+                    Padding="10,0"
+                    SelectedIndex="{Binding SelectedSaveFormatIndex}" />
+            </Grid>
+            <Grid Grid.Row="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="96" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <CheckBox
                     VerticalContentAlignment="Center"
                     Content="实时预览"
                     IsChecked="{Binding EnablePreview}"
-                    Padding="8,0,0,0"
+                    Padding="10,0,0,0"
                     ToolTip="开启后，选中一个待处理图像以查看预览" />
                 <Button
                     Grid.Column="1"

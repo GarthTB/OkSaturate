@@ -14,11 +14,12 @@ namespace OkSaturate.Services;
 /// <summary> 保存图像策略 </summary>
 internal static class SaveStrategies
 {
-    /// <summary> 所有可用保存策略的名称 </summary>
-    public static string[] Names => [.. _strategies.Keys];
+    /// <summary> 所有可用保存格式的名称 </summary>
+    public static string[] SaveFormatNames => [.. _strategies.Keys];
 
     /// <returns> 某个保存策略的实现 </returns>
-    public static Strategy GetStrategy(string name) => _strategies[name];
+    public static Strategy GetStrategy(string saveFormatName)
+        => _strategies[saveFormatName];
 
     /// <summary> 各保存策略的实现 </summary>
     private static readonly Dictionary<string, Strategy> _strategies = new()

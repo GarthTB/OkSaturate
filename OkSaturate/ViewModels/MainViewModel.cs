@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
+using OkSaturate.Services;
 using OkSaturate.Utils;
 using System.Collections.ObjectModel;
 
@@ -51,4 +52,18 @@ internal partial class MainViewModel : ObservableObject
     });
 
     #endregion
+
+    /// <summary> 所有可用色彩空间的名称 </summary>
+    public string[] ColourSpaceNames { get; } = SaturateStrategies.ColourSpaceNames;
+
+    /// <summary> 当前选择的色彩空间的索引 </summary>
+    [ObservableProperty]
+    private byte _selectedColourSpaceIndex = 0;
+
+    /// <summary> 所有可用保存策略的名称 </summary>
+    public string[] SaveFormatNames { get; } = SaveStrategies.SaveFormatNames;
+
+    /// <summary> 当前选择的保存策略的索引 </summary>
+    [ObservableProperty]
+    private byte _selectedSaveFormatIndex = 0;
 }
