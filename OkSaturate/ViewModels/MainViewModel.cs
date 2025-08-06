@@ -1,10 +1,14 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
+using OkSaturate.Models;
 using OkSaturate.Services;
 using OkSaturate.Utils;
+using SixLabors.ImageSharp;
 using System.Collections.ObjectModel;
 using System.Windows.Media.Imaging;
+using SaturateStrategy = System.Func<System.Func<double, double>, System.Func<Wacton.Unicolour.Unicolour, Wacton.Unicolour.Unicolour>>;
+using SaveStrategy = System.Func<SixLabors.ImageSharp.Image, string, System.Threading.CancellationToken, System.Threading.Tasks.Task>;
 
 namespace OkSaturate.ViewModels;
 
@@ -42,6 +46,7 @@ internal partial class MainViewModel : ObservableObject
             foreach (string path in dialog.FileNames)
                 if (!ImagePaths.Contains(path))
                     ImagePaths.Add(path);
+        RunCommand.NotifyCanExecuteChanged();
     });
 
     /// <summary> 移除选中的待处理图像路径 </summary>
@@ -50,6 +55,7 @@ internal partial class MainViewModel : ObservableObject
     {
         ImagePaths.RemoveAt(SelectedImagePathIndex);
         SelectedImagePathIndex = -1; // 避免连续移除
+        RunCommand.NotifyCanExecuteChanged();
     });
 
     #endregion
@@ -90,6 +96,11 @@ internal partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private byte _selectedColourSpaceIndex = 0;
 
+    /// <returns> 当前选择的饱和度调整策略实现 </returns>
+    private SaturateStrategy SaturateStrategy
+        => SaturateStrategies.GetStrategy(
+            ColourSpaceNames[SelectedColourSpaceIndex]);
+
     /// <summary> 所有可用保存策略的名称 </summary>
     public string[] SaveFormatNames { get; } = SaveStrategies.SaveFormatNames;
 
@@ -97,27 +108,63 @@ internal partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private byte _selectedSaveFormatIndex = 0;
 
+    /// <returns> 当前选择的保存策略实现 </returns>
+    private SaveStrategy SaveStrategy
+        => SaveStrategies.GetStrategy(
+            SaveFormatNames[SelectedSaveFormatIndex]);
+
     #endregion
 
     #region 预览和执行
 
-    /// <summary> 是否启用预览 </summary>
+    /// <summary> true预览修改后的，false预览修改前的 </summary>
     [ObservableProperty]
-    private bool _enablePreview = true;
+    private bool _previewToggle = true;
 
-    /// <summary> 预览图像 </summary>
+    /// <summary> 选中图像的修改前后预览 </summary>
+    private BitmapSource? _originalImage = null, _processedImage = null;
+
+    /// <summary> 界面上的预览图像 </summary>
     [ObservableProperty]
     private BitmapSource? _previewImage = null;
 
-    /// <summary> 预览图像的原始图像和处理后的图像 </summary>
-    private BitmapSource? _originalImage = null, _processedImage = null;
+    /// <summary> 预览和处理的CancellationTokenSource </summary>
+    private CancellationTokenSource? _cts = null;
 
-    /// <summary> 预览的CancellationTokenSource </summary>
-    private CancellationTokenSource? _previewCts = null;
+    /// <returns> 当前配置的饱和度调整器 </returns>
+    private Saturator Saturator
+        => new(SaturateStrategy, SaturationGain, UseMask);
+
+    /// <summary> 是否可以运行 </summary>
+    private bool CanRun => ImagePaths.Count > 0;
 
     /// <summary> 打断预览并执行处理 </summary>
-    [RelayCommand]
-    private void Run() => Try.Do("执行处理", () => { });
+    [RelayCommand(CanExecute = nameof(CanRun))]
+    private async Task RunAsync() => await Try.DoAsync("执行处理", async () =>
+    {
+        _cts?.Cancel();
+        _cts?.Dispose();
+        _cts = new();
+
+        var saturator = Saturator;
+        var save = SaveStrategy;
+        var token = _cts.Token;
+        List<string> issues = ["以下文件处理失败：\n\n"];
+
+        foreach (var path in ImagePaths)
+            try
+            {
+                using var image = Image.Load(path);
+                saturator.Run(image, token);
+                await save(image, path, token);
+            }
+            catch (Exception ex)
+            { issues.Add($"{path}：\n{ex.Message}"); }
+
+        if (issues.Count == 1)
+            MsgBox.Info("成功", "所有图像处理完成！");
+        else throw new AggregateException(string.Join("\n\n", issues));
+    });
 
     #endregion
 }

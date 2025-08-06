@@ -21,7 +21,7 @@
             <ColumnDefinition Width="234" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <Grid Margin="11">
+        <Grid Margin="12,11">
             <Grid.RowDefinitions>
                 <RowDefinition Height="30" />
                 <RowDefinition Height="10" />
@@ -131,10 +131,10 @@
                 </Grid.ColumnDefinitions>
                 <CheckBox
                     VerticalContentAlignment="Center"
-                    Content="实时预览"
-                    IsChecked="{Binding EnablePreview}"
+                    Content="切换预览"
+                    IsChecked="{Binding PreviewToggle}"
                     Padding="10,0,0,0"
-                    ToolTip="开启后，选中一个待处理图像以查看预览" />
+                    ToolTip="切换选中图像的修改前后预览&#x0a;勾选时显示修改后预览" />
                 <Button
                     Grid.Column="1"
                     Command="{Binding RunCommand}"
