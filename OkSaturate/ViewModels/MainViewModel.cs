@@ -53,6 +53,24 @@ internal partial class MainViewModel : ObservableObject
 
     #endregion
 
+    #region 增益值配置
+
+    /// <summary> 增益值 </summary>
+    [ObservableProperty]
+    private double _saturationGain = 0;
+
+    /// <summary> 增益值文本 </summary>
+    [ObservableProperty]
+    private string _gainText = "0";
+
+    #endregion
+
+    #region 选项型配置
+
+    /// <summary> 是否使用蒙版 </summary>
+    [ObservableProperty]
+    private bool _useMask = true;
+
     /// <summary> 所有可用色彩空间的名称 </summary>
     public string[] ColourSpaceNames { get; } = SaturateStrategies.ColourSpaceNames;
 
@@ -66,4 +84,6 @@ internal partial class MainViewModel : ObservableObject
     /// <summary> 当前选择的保存策略的索引 </summary>
     [ObservableProperty]
     private byte _selectedSaveFormatIndex = 0;
+
+    #endregion
 }
