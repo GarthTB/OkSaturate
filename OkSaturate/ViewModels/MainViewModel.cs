@@ -60,9 +60,20 @@ internal partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private double _saturationGain = 0;
 
+    partial void OnSaturationGainChanged(double value)
+    {
+        if (!double.TryParse(GainText, out var gain) || value != gain)
+            GainText = value.ToString("0.##"); // Slider步长0.04
+    }
+
     /// <summary> 增益值文本 </summary>
     [ObservableProperty]
     private string _gainText = "0";
+
+    partial void OnGainTextChanged(string value)
+        => SaturationGain = double.TryParse(value, out var gain)
+        ? Math.Clamp(gain, -1, 1)
+        : 0; // 输入非法时恢复默认值
 
     #endregion
 
