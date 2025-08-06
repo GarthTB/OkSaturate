@@ -9,14 +9,14 @@ internal static class SaturateStrategies
     /// <summary> 所有可用色彩空间的名称 </summary>
     public static string[] ColourSpaceNames => [.. _strategies.Keys];
 
-    /// <returns> 某色彩空间的饱和度调整策略 </returns>
+    /// <returns> 某个调整策略的实现 </returns>
     public static Strategy GetStrategy(string colourSpaceName)
         => _strategies[colourSpaceName];
 
     /// <summary> 饱和度最大的颜色 </summary>
     private static readonly Unicolour _maxChroma = new(ColourSpace.Rgb, 1, 0, 1);
 
-    /// <summary> 各色彩空间的饱和度调整策略 </summary>
+    /// <summary> 各调整策略的实现 </summary>
     private static readonly Dictionary<string, Strategy> _strategies = new()
     {
         ["Munsell HVC"] = (func) => (colour) =>
