@@ -13,18 +13,9 @@ internal static class SaturateStrategies
     public static Strategy GetStrategy(string colourSpaceName)
         => _strategies[colourSpaceName];
 
-    /// <summary> 饱和度最大的颜色 </summary>
-    private static readonly Unicolour _maxChroma = new(ColourSpace.Rgb, 1, 0, 1);
-
     /// <summary> 各调整策略的实现 </summary>
     private static readonly Dictionary<string, Strategy> _strategies = new()
     {
-        ["Munsell HVC"] = (func) => (colour) =>
-        {
-            var (h, v, c) = colour.Munsell.Tuple;
-            var factor = _maxChroma.Munsell.C;
-            return new(ColourSpace.Munsell, h, v, func(c / factor) * factor);
-        },
         ["HSB / HSV"] = (func) => (colour) =>
         {
             var (h, s, b) = colour.Hsb.Tuple;
@@ -48,37 +39,31 @@ internal static class SaturateStrategies
         ["LCH (CIELAB)"] = (func) => (colour) =>
         {
             var (l, c, h) = colour.Lchab.Tuple;
-            var factor = _maxChroma.Lchab.C;
-            return new(ColourSpace.Lchab, l, func(c / factor) * factor, h);
+            // 实测8位RGB最大值为133.80761432012983
+            return new(ColourSpace.Lchab, l, func(c / 134.2) * 134.2, h);
         },
         ["LCH (CIELUV)"] = (func) => (colour) =>
         {
             var (l, c, h) = colour.Lchuv.Tuple;
-            var factor = _maxChroma.Lchuv.C;
-            return new(ColourSpace.Lchuv, l, func(c / factor) * factor, h);
+            // 实测8位RGB最大值为179.04142708939614
+            return new(ColourSpace.Lchuv, l, func(c / 179.6) * 179.6, h);
         },
         ["HSL (CIELUV)"] = (func) => (colour) =>
         {
             var (h, s, l) = colour.Hsluv.Tuple;
             return new(ColourSpace.Hsluv, h, func(s), l);
         },
-        ["HPL (CIELUV)"] = (func) => (colour) =>
-        {
-            var (h, p, l) = colour.Hpluv.Tuple;
-            var factor = _maxChroma.Hpluv.S;
-            return new(ColourSpace.Hpluv, h, func(p / factor) * factor, l);
-        },
         ["JCH (Jzazbz)"] = (func) => (colour) =>
         {
             var (j, c, h) = colour.Jzczhz.Tuple;
-            var factor = _maxChroma.Jzczhz.C;
-            return new(ColourSpace.Jzczhz, j, func(c / factor) * factor, h);
+            // 实测8位RGB最大值为0.19027906590136512
+            return new(ColourSpace.Jzczhz, j, func(c / 0.1908) * 0.1908, h);
         },
         ["Oklch"] = (func) => (colour) =>
         {
             var (l, c, h) = colour.Oklch.Tuple;
-            var factor = _maxChroma.Oklch.C;
-            return new(ColourSpace.Oklch, l, func(c / factor) * factor, h);
+            // 实测8位RGB最大值为0.32249096477516476
+            return new(ColourSpace.Oklch, l, func(c / 0.3235) * 0.3235, h);
         },
         ["Okhsv"] = (func) => (colour) =>
         {
@@ -98,8 +83,8 @@ internal static class SaturateStrategies
         ["HCT"] = (func) => (colour) =>
         {
             var (h, c, t) = colour.Hct.Tuple;
-            var factor = _maxChroma.Hct.C;
-            return new(ColourSpace.Hct, h, func(c / factor) * factor, t);
+            // 实测8位RGB最大值为113.35620829574427
+            return new(ColourSpace.Hct, h, func(c / 113.7) * 113.7, t);
         }
     };
 }
