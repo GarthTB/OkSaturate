@@ -1,25 +1,29 @@
 using Wacton.Unicolour;
-using IndefSaturator = System.Func<System.Func<double, double>, System.Func<Wacton.Unicolour.Unicolour, Wacton.Unicolour.Unicolour>>;
+using Strategy = System.Func<System.Func<double, double>, System.Func<Wacton.Unicolour.Unicolour, Wacton.Unicolour.Unicolour>>;
 
 namespace OkSaturate.Services;
 
-/// <summary> 饱和度调整器工厂（未明确调整算法） </summary>
-internal static class IndefSaturatorFactory
+/// <summary> 饱和度调整策略 </summary>
+internal static class SaturateStrategies
 {
     /// <summary> 所有可用色彩空间的名称 </summary>
-    public static string[] ColourSpaceNames => [.. _saturators.Keys];
+    public static string[] ColourSpaceNames => [.. _strategies.Keys];
 
-    /// <returns> 指定色彩空间的饱和度调整器 </returns>
-    public static IndefSaturator GetSaturator(string colourSpaceName)
-        => _saturators[colourSpaceName];
+    /// <returns> 某色彩空间的饱和度调整策略 </returns>
+    public static Strategy GetStrategy(string colourSpaceName)
+        => _strategies[colourSpaceName];
 
-    /// <summary> 所有可用色彩空间的饱和度调整器 </summary>
-    private static readonly Dictionary<string, IndefSaturator> _saturators = new()
+    /// <summary> 饱和度最大的颜色 </summary>
+    private static readonly Unicolour _maxChroma = new(ColourSpace.Rgb, 1, 0, 1);
+
+    /// <summary> 各色彩空间的饱和度调整策略 </summary>
+    private static readonly Dictionary<string, Strategy> _strategies = new()
     {
         ["Munsell HVC"] = (func) => (colour) =>
         {
             var (h, v, c) = colour.Munsell.Tuple;
-            return new(ColourSpace.Munsell, h, v, func(c));
+            var factor = _maxChroma.Munsell.C;
+            return new(ColourSpace.Munsell, h, v, func(c / factor) * factor);
         },
         ["HSB / HSV"] = (func) => (colour) =>
         {
@@ -44,12 +48,14 @@ internal static class IndefSaturatorFactory
         ["LCH (CIELAB)"] = (func) => (colour) =>
         {
             var (l, c, h) = colour.Lchab.Tuple;
-            return new(ColourSpace.Lchab, l, func(c), h);
+            var factor = _maxChroma.Lchab.C;
+            return new(ColourSpace.Lchab, l, func(c / factor) * factor, h);
         },
         ["LCH (CIELUV)"] = (func) => (colour) =>
         {
             var (l, c, h) = colour.Lchuv.Tuple;
-            return new(ColourSpace.Lchuv, l, func(c), h);
+            var factor = _maxChroma.Lchuv.C;
+            return new(ColourSpace.Lchuv, l, func(c / factor) * factor, h);
         },
         ["HSL (CIELUV)"] = (func) => (colour) =>
         {
@@ -59,17 +65,20 @@ internal static class IndefSaturatorFactory
         ["HPL (CIELUV)"] = (func) => (colour) =>
         {
             var (h, p, l) = colour.Hpluv.Tuple;
-            return new(ColourSpace.Hpluv, h, func(p), l);
+            var factor = _maxChroma.Hpluv.S;
+            return new(ColourSpace.Hpluv, h, func(p / factor) * factor, l);
         },
         ["JCH (Jzazbz)"] = (func) => (colour) =>
         {
-            var (j, c, h) = colour.Jzazbz.Tuple;
-            return new(ColourSpace.Jzazbz, j, func(c), h);
+            var (j, c, h) = colour.Jzczhz.Tuple;
+            var factor = _maxChroma.Jzczhz.C;
+            return new(ColourSpace.Jzczhz, j, func(c / factor) * factor, h);
         },
         ["Oklch"] = (func) => (colour) =>
         {
             var (l, c, h) = colour.Oklch.Tuple;
-            return new(ColourSpace.Oklch, l, func(c), h);
+            var factor = _maxChroma.Oklch.C;
+            return new(ColourSpace.Oklch, l, func(c / factor) * factor, h);
         },
         ["Okhsv"] = (func) => (colour) =>
         {
@@ -89,7 +98,8 @@ internal static class IndefSaturatorFactory
         ["HCT"] = (func) => (colour) =>
         {
             var (h, c, t) = colour.Hct.Tuple;
-            return new(ColourSpace.Hct, h, func(c), t);
+            var factor = _maxChroma.Hct.C;
+            return new(ColourSpace.Hct, h, func(c / factor) * factor, t);
         }
     };
 }

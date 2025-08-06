@@ -1,16 +1,16 @@
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 using Wacton.Unicolour;
-using IndefSaturator = System.Func<System.Func<double, double>, System.Func<Wacton.Unicolour.Unicolour, Wacton.Unicolour.Unicolour>>;
+using Strategy = System.Func<System.Func<double, double>, System.Func<Wacton.Unicolour.Unicolour, Wacton.Unicolour.Unicolour>>;
 
 namespace OkSaturate.Models;
 
 /// <summary> 饱和度调整器 </summary>
-/// <param name="IndefSaturator"> 饱和度调整器（未明确调整算法） </param>
+/// <param name="SaturateStrategy"> 饱和度调整策略 </param>
 /// <param name="SaturationGain"> 饱和度增益 </param>
 /// <param name="UseMask"> 是否使用蒙版 </param>
 internal record Saturator(
-    IndefSaturator IndefSaturator, double SaturationGain, bool UseMask)
+    Strategy SaturateStrategy, double SaturationGain, bool UseMask)
 {
     /// <summary> 运行饱和度调整器（直接修改原图） </summary>
     public void Run(Image image, CancellationToken? token)
@@ -20,7 +20,7 @@ internal record Saturator(
 
         if (!UseMask)
         {
-            var saturator = IndefSaturator(SaturationGain > 0
+            var saturator = SaturateStrategy(SaturationGain > 0
                 ? (sat) => sat + SaturationGain * (1 - sat)
                 : (sat) => sat + SaturationGain * sat);
             image.Mutate(context => context.ProcessPixelRowsAsVector4(span =>
@@ -29,8 +29,8 @@ internal record Saturator(
                 foreach (ref var pixel in span)
                 {
                     var (r, g, b) = (pixel.X, pixel.Y, pixel.Z);
-                    Unicolour color = new(ColourSpace.Rgb, r, g, b);
-                    var newRGB = saturator(color).Rgb;
+                    Unicolour colour = new(ColourSpace.Rgb, r, g, b);
+                    var newRGB = saturator(colour).Rgb;
                     (pixel.X, pixel.Y, pixel.Z) =
                         ((float)newRGB.R, (float)newRGB.G, (float)newRGB.B);
                 }
@@ -42,12 +42,12 @@ internal record Saturator(
             foreach (ref var pixel in span)
             {
                 var (r, g, b) = (pixel.X, pixel.Y, pixel.Z);
-                Unicolour color = new(ColourSpace.Rgb, r, g, b);
+                Unicolour colour = new(ColourSpace.Rgb, r, g, b);
                 var gain = GetMask(r, g, b) * SaturationGain;
-                var saturator = IndefSaturator(gain > 0
+                var saturator = SaturateStrategy(gain > 0
                     ? (sat) => sat + gain * (1 - sat)
                     : (sat) => sat + gain * sat);
-                var newRGB = saturator(color).Rgb;
+                var newRGB = saturator(colour).Rgb;
                 (pixel.X, pixel.Y, pixel.Z) =
                     ((float)newRGB.R, (float)newRGB.G, (float)newRGB.B);
             }
