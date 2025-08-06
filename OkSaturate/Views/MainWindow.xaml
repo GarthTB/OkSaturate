@@ -5,7 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:OkSaturate.ViewModels"
-    Width="740"
+    Width="720"
     Height="460"
     mc:Ignorable="d"
     AllowDrop="True"
@@ -18,24 +18,24 @@
     </Window.DataContext>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="240" />
+            <ColumnDefinition Width="234" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <Grid Margin="11">
             <Grid.RowDefinitions>
-                <RowDefinition Height="14*" />
-                <RowDefinition Height="5*" />
-                <RowDefinition Height="80*" />
-                <RowDefinition Height="5*" />
-                <RowDefinition Height="14*" />
-                <RowDefinition Height="5*" />
-                <RowDefinition Height="14*" />
-                <RowDefinition Height="5*" />
-                <RowDefinition Height="14*" />
-                <RowDefinition Height="5*" />
-                <RowDefinition Height="14*" />
-                <RowDefinition Height="5*" />
-                <RowDefinition Height="14*" />
+                <RowDefinition Height="30" />
+                <RowDefinition Height="10" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="10" />
+                <RowDefinition Height="30" />
+                <RowDefinition Height="10" />
+                <RowDefinition Height="30" />
+                <RowDefinition Height="10" />
+                <RowDefinition Height="30" />
+                <RowDefinition Height="10" />
+                <RowDefinition Height="30" />
+                <RowDefinition Height="10" />
+                <RowDefinition Height="30" />
             </Grid.RowDefinitions>
             <Grid>
                 <Grid.ColumnDefinitions>

@@ -4,6 +4,7 @@ using Microsoft.Win32;
 using OkSaturate.Services;
 using OkSaturate.Utils;
 using System.Collections.ObjectModel;
+using System.Windows.Media.Imaging;
 
 namespace OkSaturate.ViewModels;
 
@@ -84,6 +85,28 @@ internal partial class MainViewModel : ObservableObject
     /// <summary> 当前选择的保存策略的索引 </summary>
     [ObservableProperty]
     private byte _selectedSaveFormatIndex = 0;
+
+    #endregion
+
+    #region 预览和执行
+
+    /// <summary> 是否启用预览 </summary>
+    [ObservableProperty]
+    private bool _enablePreview = true;
+
+    /// <summary> 预览图像 </summary>
+    [ObservableProperty]
+    private BitmapSource? _previewImage = null;
+
+    /// <summary> 预览图像的原始图像和处理后的图像 </summary>
+    private BitmapSource? _originalImage = null, _processedImage = null;
+
+    /// <summary> 预览的CancellationTokenSource </summary>
+    private CancellationTokenSource? _previewCts = null;
+
+    /// <summary> 打断预览并执行处理 </summary>
+    [RelayCommand]
+    private void Run() => Try.Do("执行处理", () => { });
 
     #endregion
 }
