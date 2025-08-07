@@ -13,10 +13,10 @@ internal record Saturator(
     Strategy SaturateStrategy, double SaturationGain, bool UseMask)
 {
     /// <summary> 运行饱和度调整器（直接修改原图） </summary>
-    public void Run(Image image, CancellationToken? token)
+    public void Run(Image image, CancellationToken token)
     {
         if (SaturationGain == 0) return;
-        token?.ThrowIfCancellationRequested();
+        token.ThrowIfCancellationRequested();
 
         if (!UseMask)
         {
@@ -25,31 +25,29 @@ internal record Saturator(
                 : (sat) => sat + SaturationGain * sat);
             image.Mutate(context => context.ProcessPixelRowsAsVector4(span =>
             {
-                token?.ThrowIfCancellationRequested();
-                foreach (ref var pixel in span)
+                token.ThrowIfCancellationRequested();
+                foreach (ref var px in span)
                 {
-                    var (r, g, b) = (pixel.X, pixel.Y, pixel.Z);
+                    var (r, g, b) = (px.X, px.Y, px.Z);
                     Unicolour colour = new(ColourSpace.Rgb, r, g, b);
-                    var newRGB = saturator(colour).Rgb;
-                    (pixel.X, pixel.Y, pixel.Z) =
-                        ((float)newRGB.R, (float)newRGB.G, (float)newRGB.B);
+                    var (mr, mg, mb) = saturator(colour).Rgb.Tuple;
+                    (px.X, px.Y, px.Z) = ((float)mr, (float)mg, (float)mb);
                 }
             }));
         }
         else image.Mutate(context => context.ProcessPixelRowsAsVector4(span =>
         {
-            token?.ThrowIfCancellationRequested();
-            foreach (ref var pixel in span)
+            token.ThrowIfCancellationRequested();
+            foreach (ref var px in span)
             {
-                var (r, g, b) = (pixel.X, pixel.Y, pixel.Z);
+                var (r, g, b) = (px.X, px.Y, px.Z);
                 Unicolour colour = new(ColourSpace.Rgb, r, g, b);
                 var gain = GetMask(r, g, b) * SaturationGain;
                 var saturator = SaturateStrategy(gain > 0
                     ? (sat) => sat + gain * (1 - sat)
                     : (sat) => sat + gain * sat);
-                var newRGB = saturator(colour).Rgb;
-                (pixel.X, pixel.Y, pixel.Z) =
-                    ((float)newRGB.R, (float)newRGB.G, (float)newRGB.B);
+                var (mr, mg, mb) = saturator(colour).Rgb.Tuple;
+                (px.X, px.Y, px.Z) = ((float)mr, (float)mg, (float)mb);
             }
         }));
     }
