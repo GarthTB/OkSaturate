@@ -147,19 +147,19 @@ internal partial class MainViewModel : ObservableObject
         _cts = new();
 
         var saturator = Saturator;
-        var save = SaveStrategy;
+        var saveAsync = SaveStrategy;
         var token = _cts.Token;
-        List<string> issues = ["以下文件处理失败：\n\n"];
+        List<string> issues = ["以下文件处理出错："];
 
         foreach (var path in ImagePaths)
             try
             {
                 using var image = Image.Load(path);
                 saturator.Run(image, token);
-                await save(image, path, token);
+                await saveAsync(image, path, token);
             }
-            catch (Exception ex)
-            { issues.Add($"{path}：\n{ex.Message}"); }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            { issues.Add($"{path} 出错：\n{ex.Message}"); }
 
         if (issues.Count == 1)
             MsgBox.Info("成功", "所有图像处理完成！");

@@ -10,8 +10,7 @@ internal static class SaturateStrategies
     public static string[] ColourSpaceNames => [.. _strategies.Keys];
 
     /// <returns> 某个调整策略的实现 </returns>
-    public static Strategy GetStrategy(string colourSpaceName)
-        => _strategies[colourSpaceName];
+    public static Strategy Get(string colourSpaceName) => _strategies[colourSpaceName];
 
     /// <summary> 各调整策略的实现 </summary>
     private static readonly Dictionary<string, Strategy> _strategies = new()

@@ -18,8 +18,7 @@ internal static class SaveStrategies
     public static string[] SaveFormatNames => [.. _strategies.Keys];
 
     /// <returns> 某个保存策略的实现 </returns>
-    public static Strategy GetStrategy(string saveFormatName)
-        => _strategies[saveFormatName];
+    public static Strategy Get(string saveFormatName) => _strategies[saveFormatName];
 
     /// <summary> 各保存策略的实现 </summary>
     private static readonly Dictionary<string, Strategy> _strategies = new()
