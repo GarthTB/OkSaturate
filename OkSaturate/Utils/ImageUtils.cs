@@ -17,7 +17,7 @@ internal static class ImageUtils
         var (tw, th) = (Math.Round(w * scale), Math.Round(h * scale));
 
         if (scale < 1)
-            image.Mutate(context => context.Resize(new ResizeOptions()
+            image.Mutate(ctx => ctx.Resize(new ResizeOptions()
             {
                 Mode = ResizeMode.Max,
                 Sampler = KnownResamplers.Triangle,

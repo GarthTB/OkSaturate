@@ -23,7 +23,7 @@ internal record Saturator(
             var saturator = SaturateStrategy(SaturationGain > 0
                 ? (sat) => sat + SaturationGain * (1 - sat)
                 : (sat) => sat + SaturationGain * sat);
-            image.Mutate(context => context.ProcessPixelRowsAsVector4(span =>
+            image.Mutate(ctx => ctx.ProcessPixelRowsAsVector4(span =>
             {
                 token.ThrowIfCancellationRequested();
                 foreach (ref var px in span)
@@ -35,7 +35,7 @@ internal record Saturator(
                 }
             }));
         }
-        else image.Mutate(context => context.ProcessPixelRowsAsVector4(span =>
+        else image.Mutate(ctx => ctx.ProcessPixelRowsAsVector4(span =>
         {
             token.ThrowIfCancellationRequested();
             foreach (ref var px in span)

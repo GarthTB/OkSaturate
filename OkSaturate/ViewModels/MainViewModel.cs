@@ -126,7 +126,16 @@ internal partial class MainViewModel : ObservableObject
     #region 刷新预览和执行处理
 
     /// <summary> 预览和处理的CancellationTokenSource </summary>
-    private CancellationTokenSource? _cts = null;
+    private CancellationTokenSource _cts = new();
+
+    /// <summary> 取消当前_cts，创建一个新的，并返回其token </summary>
+    private CancellationToken CancelAndGetNewToken()
+    {
+        _cts.Cancel();
+        _cts.Dispose();
+        _cts = new();
+        return _cts.Token;
+    }
 
     /// <returns> 当前配置的饱和度调整器 </returns>
     private Saturator Saturator => new(SaturateStrategy, SaturationGain, UseMask);
@@ -149,29 +158,25 @@ internal partial class MainViewModel : ObservableObject
     private async Task UpdatePreviewAsync(bool srcChanged, bool dstChanged)
         => await Try.DoAsync("刷新预览", async () =>
         {
-            _cts?.Cancel();
-            _cts?.Dispose();
-            _cts = new();
-            var token = _cts.Token;
+            var token = CancelAndGetNewToken();
 
-            if (!HasSelectedPath)
+            if (!HasSelectedPath) // 没选中，不预览
             {
                 PreviewImage = _srcPreview = _dstPreview = null;
                 return;
             }
-            var path = ImagePaths[SelectedImagePathIndex];
 
+            var path = ImagePaths[SelectedImagePathIndex];
             if (!PreviewDst && (srcChanged || _srcPreview is null)) // 修改前预览
             {
-                using var image = Image.Load(path);
+                using var image = await Image.LoadAsync(path, token);
                 token.ThrowIfCancellationRequested();
                 ImageUtils.ToThumbnail(image);
                 _srcPreview = await image.ToBitmapSourceAsync(token);
             }
             if (PreviewDst && (dstChanged || _dstPreview is null)) // 修改后预览
             {
-                await Task.Delay(180, token).ConfigureAwait(true); // 防抖
-                using var image = Image.Load(path);
+                using var image = await Image.LoadAsync(path, token);
                 token.ThrowIfCancellationRequested();
                 ImageUtils.ToThumbnail(image);
                 Saturator.Process(image, token);
@@ -188,11 +193,7 @@ internal partial class MainViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanProcess))]
     private async Task ProcessAsync() => await Try.DoAsync("执行处理", async () =>
     {
-        _cts?.Cancel();
-        _cts?.Dispose();
-        _cts = new();
-        var token = _cts.Token;
-
+        var token = CancelAndGetNewToken();
         var saturator = Saturator;
         var saveAsync = SaveStrategy;
         List<string> issues = ["以下文件处理出错："];
@@ -200,7 +201,7 @@ internal partial class MainViewModel : ObservableObject
         foreach (var path in ImagePaths)
             try
             {
-                using var image = Image.Load(path);
+                using var image = await Image.LoadAsync(path, token);
                 saturator.Process(image, token);
                 await saveAsync(image, path, token);
             }
