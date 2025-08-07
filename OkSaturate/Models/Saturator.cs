@@ -52,7 +52,7 @@ internal record Saturator(
         }));
     }
 
-    /// <summary> 计算蒙版（调整强度） </summary>
+    /// <returns> 蒙版系数（调整强度） </returns>
     private static double GetMask(float r, float g, float b)
     {
         var rDist = Math.Min(r, 1 - r);

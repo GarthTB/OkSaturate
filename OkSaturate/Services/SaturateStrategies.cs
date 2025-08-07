@@ -50,7 +50,7 @@ internal static class SaturateStrategies
         ["HSL (CIELUV)"] = (func) => (colour) =>
         {
             var (h, s, l) = colour.Hsluv.Tuple;
-            return new(ColourSpace.Hsluv, h, func(s), l);
+            return new(ColourSpace.Hsluv, h, func(s / 100) * 100, l);
         },
         ["JCH (Jzazbz)"] = (func) => (colour) =>
         {
@@ -77,7 +77,8 @@ internal static class SaturateStrategies
         ["Oklrch"] = (func) => (colour) =>
         {
             var (l, c, h) = colour.Oklrch.Tuple;
-            return new(ColourSpace.Oklrch, l, func(c), h);
+            // 实测8位RGB最大值为0.32249096477516476
+            return new(ColourSpace.Oklrch, l, func(c / 0.3235) * 0.3235, h);
         },
         ["HCT"] = (func) => (colour) =>
         {

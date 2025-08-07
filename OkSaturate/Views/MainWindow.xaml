@@ -82,7 +82,7 @@
                     Content="蒙版"
                     IsChecked="{Binding UseMask}"
                     Padding="10,0,0,0"
-                    ToolTip="使用蒙版来避免溢出" />
+                    ToolTip="使用蒙版来避免高饱和度区域溢出" />
                 <Label
                     Grid.Column="1"
                     HorizontalContentAlignment="Center"
