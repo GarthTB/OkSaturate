@@ -12,8 +12,8 @@ namespace OkSaturate.Models;
 internal record Saturator(
     Strategy SaturateStrategy, double SaturationGain, bool UseMask)
 {
-    /// <summary> 运行饱和度调整器（直接修改原图） </summary>
-    public void Run(Image image, CancellationToken token)
+    /// <summary> 执行饱和度调整 </summary>
+    public void Process(Image image, CancellationToken token)
     {
         if (SaturationGain == 0) return;
         token.ThrowIfCancellationRequested();

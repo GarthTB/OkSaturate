@@ -22,8 +22,27 @@ internal partial class MainViewModel : ObservableObject
 
     /// <summary> 选中的待处理图像路径的索引 </summary>
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(RemovePathCommand))]
     private int _selectedImagePathIndex = -1;
+
+    partial void OnSelectedImagePathIndexChanged(int value)
+    {
+        _ = Try.DoAsync("加载预览", async () =>
+        {
+            _cts?.Cancel();
+            _cts?.Dispose();
+            _cts = new();
+            var token = _cts.Token;
+
+            _srcPreview = HasSelectedPath
+                ? await Image.Load(ImagePaths[value])
+                    .ToThumbnail()
+                    .ToBitmapSourceAsync(token)
+                : null;
+
+            await UpdateDstPreviewAsync();
+        });
+        RemovePathCommand.NotifyCanExecuteChanged();
+    }
 
     /// <returns> 是否选中了待处理图像路径 </returns>
     private bool HasSelectedPath
@@ -46,7 +65,7 @@ internal partial class MainViewModel : ObservableObject
             foreach (string path in dialog.FileNames)
                 if (!ImagePaths.Contains(path))
                     ImagePaths.Add(path);
-        RunCommand.NotifyCanExecuteChanged();
+        ProcessCommand.NotifyCanExecuteChanged();
     });
 
     /// <summary> 移除选中的待处理图像路径 </summary>
@@ -55,7 +74,7 @@ internal partial class MainViewModel : ObservableObject
     {
         ImagePaths.RemoveAt(SelectedImagePathIndex);
         SelectedImagePathIndex = -1; // 避免连续移除
-        RunCommand.NotifyCanExecuteChanged();
+        ProcessCommand.NotifyCanExecuteChanged();
     });
 
     #endregion
@@ -70,6 +89,7 @@ internal partial class MainViewModel : ObservableObject
     {
         if (!double.TryParse(GainText, out var gain) || value != gain)
             GainText = value.ToString("0.##"); // Slider步长0.04
+        _ = UpdateDstPreviewAsync();
     }
 
     /// <summary> 增益值文本 </summary>
@@ -79,7 +99,7 @@ internal partial class MainViewModel : ObservableObject
     partial void OnGainTextChanged(string value)
         => SaturationGain = double.TryParse(value, out var gain)
         ? Math.Clamp(gain, -1, 1)
-        : 0; // 输入非法时恢复默认值
+        : 0; // 输入无效时设为0（文本也会被更新）
 
     #endregion
 
@@ -89,6 +109,8 @@ internal partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private bool _useMask = true;
 
+    partial void OnUseMaskChanged(bool value) => _ = UpdateDstPreviewAsync();
+
     /// <summary> 所有可用色彩空间的名称 </summary>
     public string[] ColourSpaceNames { get; } = SaturateStrategies.ColourSpaceNames;
 
@@ -96,10 +118,11 @@ internal partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private byte _selectedColourSpaceIndex = 0;
 
+    partial void OnSelectedColourSpaceIndexChanged(byte value) => _ = UpdateDstPreviewAsync();
+
     /// <returns> 当前选择的饱和度调整策略实现 </returns>
     private SaturateStrategy SaturateStrategy
-        => SaturateStrategies.GetStrategy(
-            ColourSpaceNames[SelectedColourSpaceIndex]);
+        => SaturateStrategies.Get(ColourSpaceNames[SelectedColourSpaceIndex]);
 
     /// <summary> 所有可用保存策略的名称 </summary>
     public string[] SaveFormatNames { get; } = SaveStrategies.SaveFormatNames;
@@ -110,52 +133,66 @@ internal partial class MainViewModel : ObservableObject
 
     /// <returns> 当前选择的保存策略实现 </returns>
     private SaveStrategy SaveStrategy
-        => SaveStrategies.GetStrategy(
-            SaveFormatNames[SelectedSaveFormatIndex]);
+        => SaveStrategies.Get(SaveFormatNames[SelectedSaveFormatIndex]);
 
     #endregion
 
-    #region 预览和执行
-
-    /// <summary> true预览修改后的，false预览修改前的 </summary>
-    [ObservableProperty]
-    private bool _previewToggle = true;
-
-    /// <summary> 选中图像的修改前后预览 </summary>
-    private BitmapSource? _originalImage = null, _processedImage = null;
-
-    /// <summary> 界面上的预览图像 </summary>
-    [ObservableProperty]
-    private BitmapSource? _previewImage = null;
+    #region 刷新预览和执行处理
 
     /// <summary> 预览和处理的CancellationTokenSource </summary>
     private CancellationTokenSource? _cts = null;
 
     /// <returns> 当前配置的饱和度调整器 </returns>
-    private Saturator Saturator
-        => new(SaturateStrategy, SaturationGain, UseMask);
+    private Saturator Saturator => new(SaturateStrategy, SaturationGain, UseMask);
+
+    /// <summary> true预览修改后的，false预览修改前的 </summary>
+    [ObservableProperty]
+    private bool _previewToggle = true;
+
+    partial void OnPreviewToggleChanged(bool value)
+    {
+        if (!value)
+            PreviewImage = _srcPreview;
+        else if (_dstPreview is null)
+            _ = UpdateDstPreviewAsync();
+        else PreviewImage = _dstPreview;
+    }
+
+    /// <summary> 选中图像的修改前后预览 </summary>
+    private BitmapSource? _srcPreview = null, _dstPreview = null;
+
+    /// <summary> 界面上的预览图像 </summary>
+    [ObservableProperty]
+    private BitmapSource? _previewImage = null;
+
+    /// <summary> 打断并刷新修改后预览 </summary>
+    private async Task UpdateDstPreviewAsync()
+        => await Try.DoAsync("刷新修改后预览", async () =>
+        {
+
+        });
 
     /// <summary> 是否可以运行 </summary>
-    private bool CanRun => ImagePaths.Count > 0;
+    private bool CanProcess => ImagePaths.Count > 0;
 
     /// <summary> 打断预览并执行处理 </summary>
-    [RelayCommand(CanExecute = nameof(CanRun))]
-    private async Task RunAsync() => await Try.DoAsync("执行处理", async () =>
+    [RelayCommand(CanExecute = nameof(CanProcess))]
+    private async Task ProcessAsync() => await Try.DoAsync("执行处理", async () =>
     {
         _cts?.Cancel();
         _cts?.Dispose();
         _cts = new();
+        var token = _cts.Token;
 
         var saturator = Saturator;
         var saveAsync = SaveStrategy;
-        var token = _cts.Token;
         List<string> issues = ["以下文件处理出错："];
 
         foreach (var path in ImagePaths)
             try
             {
                 using var image = Image.Load(path);
-                saturator.Run(image, token);
+                saturator.Process(image, token);
                 await saveAsync(image, path, token);
             }
             catch (Exception ex) when (ex is not OperationCanceledException)

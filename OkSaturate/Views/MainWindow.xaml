@@ -137,7 +137,7 @@
                     ToolTip="切换选中图像的修改前后预览&#x0a;勾选时显示修改后预览" />
                 <Button
                     Grid.Column="1"
-                    Command="{Binding RunCommand}"
+                    Command="{Binding ProcessCommand}"
                     Content="开始执行" />
             </Grid>
         </Grid>
