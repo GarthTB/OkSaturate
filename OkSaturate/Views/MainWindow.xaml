@@ -132,7 +132,7 @@
                 <CheckBox
                     VerticalContentAlignment="Center"
                     Content="切换预览"
-                    IsChecked="{Binding PreviewToggle}"
+                    IsChecked="{Binding PreviewDst}"
                     Padding="10,0,0,0"
                     ToolTip="切换选中图像的修改前后预览&#x0a;勾选时显示修改后预览" />
                 <Button

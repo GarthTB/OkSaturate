@@ -22,27 +22,11 @@ internal partial class MainViewModel : ObservableObject
 
     /// <summary> 选中的待处理图像路径的索引 </summary>
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(RemovePathCommand))]
     private int _selectedImagePathIndex = -1;
 
     partial void OnSelectedImagePathIndexChanged(int value)
-    {
-        _ = Try.DoAsync("加载预览", async () =>
-        {
-            _cts?.Cancel();
-            _cts?.Dispose();
-            _cts = new();
-            var token = _cts.Token;
-
-            _srcPreview = HasSelectedPath
-                ? await Image.Load(ImagePaths[value])
-                    .ToThumbnail()
-                    .ToBitmapSourceAsync(token)
-                : null;
-
-            await UpdateDstPreviewAsync();
-        });
-        RemovePathCommand.NotifyCanExecuteChanged();
-    }
+        => _ = UpdatePreviewAsync(true, true);
 
     /// <returns> 是否选中了待处理图像路径 </returns>
     private bool HasSelectedPath
@@ -89,7 +73,7 @@ internal partial class MainViewModel : ObservableObject
     {
         if (!double.TryParse(GainText, out var gain) || value != gain)
             GainText = value.ToString("0.##"); // Slider步长0.04
-        _ = UpdateDstPreviewAsync();
+        _ = UpdatePreviewAsync(false, true);
     }
 
     /// <summary> 增益值文本 </summary>
@@ -109,7 +93,8 @@ internal partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private bool _useMask = true;
 
-    partial void OnUseMaskChanged(bool value) => _ = UpdateDstPreviewAsync();
+    partial void OnUseMaskChanged(bool value)
+        => _ = UpdatePreviewAsync(false, true);
 
     /// <summary> 所有可用色彩空间的名称 </summary>
     public string[] ColourSpaceNames { get; } = SaturateStrategies.ColourSpaceNames;
@@ -118,7 +103,8 @@ internal partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private byte _selectedColourSpaceIndex = 0;
 
-    partial void OnSelectedColourSpaceIndexChanged(byte value) => _ = UpdateDstPreviewAsync();
+    partial void OnSelectedColourSpaceIndexChanged(byte value)
+        => _ = UpdatePreviewAsync(false, true);
 
     /// <returns> 当前选择的饱和度调整策略实现 </returns>
     private SaturateStrategy SaturateStrategy
@@ -147,16 +133,10 @@ internal partial class MainViewModel : ObservableObject
 
     /// <summary> true预览修改后的，false预览修改前的 </summary>
     [ObservableProperty]
-    private bool _previewToggle = true;
+    private bool _previewDst = true;
 
-    partial void OnPreviewToggleChanged(bool value)
-    {
-        if (!value)
-            PreviewImage = _srcPreview;
-        else if (_dstPreview is null)
-            _ = UpdateDstPreviewAsync();
-        else PreviewImage = _dstPreview;
-    }
+    partial void OnPreviewDstChanged(bool value)
+        => _ = UpdatePreviewAsync(false, false);
 
     /// <summary> 选中图像的修改前后预览 </summary>
     private BitmapSource? _srcPreview = null, _dstPreview = null;
@@ -165,11 +145,40 @@ internal partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private BitmapSource? _previewImage = null;
 
-    /// <summary> 打断并刷新修改后预览 </summary>
-    private async Task UpdateDstPreviewAsync()
-        => await Try.DoAsync("刷新修改后预览", async () =>
+    /// <summary> 打断并刷新预览 </summary>
+    private async Task UpdatePreviewAsync(bool srcChanged, bool dstChanged)
+        => await Try.DoAsync("刷新预览", async () =>
         {
+            _cts?.Cancel();
+            _cts?.Dispose();
+            _cts = new();
+            var token = _cts.Token;
 
+            if (!HasSelectedPath)
+            {
+                PreviewImage = _srcPreview = _dstPreview = null;
+                return;
+            }
+            var path = ImagePaths[SelectedImagePathIndex];
+
+            if (!PreviewDst && (srcChanged || _srcPreview is null)) // 修改前预览
+            {
+                using var image = Image.Load(path);
+                token.ThrowIfCancellationRequested();
+                ImageUtils.ToThumbnail(image);
+                _srcPreview = await image.ToBitmapSourceAsync(token);
+            }
+            if (PreviewDst && (dstChanged || _dstPreview is null)) // 修改后预览
+            {
+                await Task.Delay(180, token).ConfigureAwait(true); // 防抖
+                using var image = Image.Load(path);
+                token.ThrowIfCancellationRequested();
+                ImageUtils.ToThumbnail(image);
+                Saturator.Process(image, token);
+                _dstPreview = await image.ToBitmapSourceAsync(token);
+            }
+
+            PreviewImage = PreviewDst ? _dstPreview : _srcPreview;
         });
 
     /// <summary> 是否可以运行 </summary>
