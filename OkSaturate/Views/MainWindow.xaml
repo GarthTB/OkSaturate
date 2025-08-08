@@ -18,7 +18,7 @@
     </Window.DataContext>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="234" />
+            <ColumnDefinition Width="242" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <Grid Margin="12,11">

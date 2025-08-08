@@ -15,7 +15,7 @@ internal static class SaturateStrategies
     /// <summary> 各调整策略的实现 </summary>
     private static readonly Dictionary<string, Strategy> _strategies = new()
     {
-        ["HSB / HSV"] = (func) => (colour) =>
+        ["HSB/HSV"] = (func) => (colour) =>
         {
             var (h, s, b) = colour.Hsb.Tuple;
             return new(ColourSpace.Hsb, h, func(s), b);
@@ -35,30 +35,30 @@ internal static class SaturateStrategies
             var (t, s, l) = colour.Tsl.Tuple;
             return new(ColourSpace.Tsl, t, func(s), l);
         },
-        ["LCH (CIELAB)"] = (func) => (colour) =>
+        ["LCh (ab)"] = (func) => (colour) =>
         {
             var (l, c, h) = colour.Lchab.Tuple;
             // 实测8位RGB最大值为133.80761432012983
             return new(ColourSpace.Lchab, l, func(c / 134.2) * 134.2, h);
         },
-        ["LCH (CIELUV)"] = (func) => (colour) =>
+        ["LCh (uv)"] = (func) => (colour) =>
         {
             var (l, c, h) = colour.Lchuv.Tuple;
             // 实测8位RGB最大值为179.04142708939614
             return new(ColourSpace.Lchuv, l, func(c / 179.6) * 179.6, h);
         },
-        ["HSL (CIELUV)"] = (func) => (colour) =>
+        ["HSL (CIELuv)"] = (func) => (colour) =>
         {
             var (h, s, l) = colour.Hsluv.Tuple;
             return new(ColourSpace.Hsluv, h, func(s / 100) * 100, l);
         },
-        ["JCH (Jzazbz)"] = (func) => (colour) =>
+        ["JzCzhz"] = (func) => (colour) =>
         {
             var (j, c, h) = colour.Jzczhz.Tuple;
             // 实测8位RGB最大值为0.19027906590136512
             return new(ColourSpace.Jzczhz, j, func(c / 0.1908) * 0.1908, h);
         },
-        ["Oklch"] = (func) => (colour) =>
+        ["OkLCh"] = (func) => (colour) =>
         {
             var (l, c, h) = colour.Oklch.Tuple;
             // 实测8位RGB最大值为0.32249096477516476
@@ -74,7 +74,7 @@ internal static class SaturateStrategies
             var (h, s, l) = colour.Okhsl.Tuple;
             return new(ColourSpace.Okhsl, h, func(s), l);
         },
-        ["Oklrch"] = (func) => (colour) =>
+        ["OkLrCh"] = (func) => (colour) =>
         {
             var (l, c, h) = colour.Oklrch.Tuple;
             // 实测8位RGB最大值为0.32249096477516476

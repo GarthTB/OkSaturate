@@ -160,26 +160,28 @@ internal partial class MainViewModel : ObservableObject
         {
             var token = CancelAndGetNewToken();
 
+            if (srcChanged) _srcPreview = null;
+            if (dstChanged) _dstPreview = null;
             if (!HasSelectedPath) // 没选中，不预览
-            {
-                PreviewImage = _srcPreview = _dstPreview = null;
-                return;
-            }
+            { PreviewImage = null; return; }
 
             var path = ImagePaths[SelectedImagePathIndex];
-            if (!PreviewDst && (srcChanged || _srcPreview is null)) // 修改前预览
+            if (!PreviewDst && _srcPreview is null) // 修改前预览
             {
                 using var image = await Image.LoadAsync(path, token);
                 token.ThrowIfCancellationRequested();
                 ImageUtils.ToThumbnail(image);
+                token.ThrowIfCancellationRequested();
                 _srcPreview = await image.ToBitmapSourceAsync(token);
             }
-            if (PreviewDst && (dstChanged || _dstPreview is null)) // 修改后预览
+            if (PreviewDst && _dstPreview is null) // 修改后预览
             {
                 using var image = await Image.LoadAsync(path, token);
                 token.ThrowIfCancellationRequested();
                 ImageUtils.ToThumbnail(image);
+                token.ThrowIfCancellationRequested();
                 Saturator.Process(image, token);
+                token.ThrowIfCancellationRequested();
                 _dstPreview = await image.ToBitmapSourceAsync(token);
             }
 
