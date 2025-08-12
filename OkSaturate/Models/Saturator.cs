@@ -21,8 +21,8 @@ internal record Saturator(
         if (!UseMask)
         {
             var saturator = SaturateStrategy(SaturationGain > 0
-                ? (sat) => sat + SaturationGain * (1 - sat)
-                : (sat) => sat + SaturationGain * sat);
+                ? (sat) => Math.Pow(sat, 1 - SaturationGain)
+                : (sat) => sat * (1 + SaturationGain));
             image.Mutate(ctx => ctx.ProcessPixelRowsAsVector4(span =>
             {
                 token.ThrowIfCancellationRequested();
@@ -41,11 +41,11 @@ internal record Saturator(
             foreach (ref var px in span)
             {
                 var (r, g, b) = (px.X, px.Y, px.Z);
-                Unicolour colour = new(ColourSpace.Rgb, r, g, b);
                 var gain = GetMask(r, g, b) * SaturationGain;
                 var saturator = SaturateStrategy(gain > 0
-                    ? (sat) => sat + gain * (1 - sat)
-                    : (sat) => sat + gain * sat);
+                    ? (sat) => Math.Pow(sat, 1 - gain)
+                    : (sat) => sat * (1 + gain));
+                Unicolour colour = new(ColourSpace.Rgb, r, g, b);
                 var (mr, mg, mb) = saturator(colour).Rgb.Tuple;
                 (px.X, px.Y, px.Z) = ((float)mr, (float)mg, (float)mb);
             }
