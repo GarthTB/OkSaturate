@@ -2,7 +2,7 @@
 
 [![用前必读 README.md](https://img.shields.io/badge/用前必读-README.md-red)](https://github.com/GarthTB/OkSaturate/blob/master/README.md)
 [![开发框架 .NET 10.0](https://img.shields.io/badge/开发框架-.NET%2010.0-blueviolet)](https://dotnet.microsoft.com/zh-cn/download/dotnet/10.0)
-[![最新版本 1.0.0](https://img.shields.io/badge/最新版本-1.0.0-brightgreen)](https://github.com/GarthTB/OkSaturate/releases/latest)
+[![最新版本 1.1.0](https://img.shields.io/badge/最新版本-1.1.0-brightgreen)](https://github.com/GarthTB/OkSaturate/releases/latest)
 [![开源协议 MIT](https://img.shields.io/badge/开源协议-MIT-brown)](https://mit-license.org/)
 
 ## 📖 项目简介
@@ -59,6 +59,10 @@
 - **项目地址**：https://github.com/GarthTB/OkSaturate
 
 ## 📝 更新日志
+
+### v1.1.0 (20250813)
+
+- 优化：低饱和度区域提升更柔和
 
 ### v1.0.0 (20250808)
 
