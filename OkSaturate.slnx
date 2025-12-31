@@ -1,3 +1,4 @@
 <Solution>
     <Project Path="OkSaturate/OkSaturate.csproj"/>
+    <Project Path="Tests/Tests.csproj"/>
 </Solution>
