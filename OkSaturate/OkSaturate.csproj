@@ -1,35 +1,44 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <UseWPF>true</UseWPF>
-    <ApplicationIcon>Assets\favicon.ico</ApplicationIcon>
-    <Title>OkSaturate</Title>
-    <Version>1.1.0</Version>
-    <Authors>GarthTB | 天卜 &lt;g-art-h@outlook.com&gt;</Authors>
-    <Company>GarthTB | 天卜 &lt;g-art-h@outlook.com&gt;</Company>
-    <Product>OkSaturate</Product>
-    <Description>A Windows GUI application for adjusting image vibrance in multiple color spaces | 用于在多种色彩空间中调整图像饱和度的 Windows GUI 应用程序</Description>
-    <Copyright>Copyright (c) 2025 GarthTB | 天卜</Copyright>
-    <RepositoryUrl>https://github.com/GarthTB/OkSaturate</RepositoryUrl>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net10.0-windows</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UseWPF>true</UseWPF>
+        <ApplicationIcon>icon.ico</ApplicationIcon>
+        <Version>1.2.0</Version>
+        <Title>Ok Saturate</Title>
+        <Authors>Garth TB &lt;g-art-h@outlook.com&gt;</Authors>
+        <Description>🎨 A Windows GUI application for adjusting image saturation in multiple color spaces | 用于在多种色彩空间中调整图像饱和度的 Windows GUI 应用程序 🖌</Description>
+        <Copyright>Copyright (c) 2026 Garth TB | 天卜</Copyright>
+        <PackageProjectUrl>https://github.com/GarthTB/OkSaturate</PackageProjectUrl>
+        <PackageLicenseUrl>https://mit-license.org/</PackageLicenseUrl>
+        <PackageIcon>icon.png</PackageIcon>
+        <Company>Garth TB &lt;g-art-h@outlook.com&gt;</Company>
+        <Product>Ok Saturate</Product>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DebugType>none</DebugType>
-  </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <PlatformTarget>x64</PlatformTarget>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <None Include="..\LICENSE" />
-    <None Include="..\README.md" />
-  </ItemGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <PlatformTarget>x64</PlatformTarget>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.11" />
-    <PackageReference Include="Wacton.Unicolour" Version="6.2.0" />
-  </ItemGroup>
+    <ItemGroup>
+        <Page Update="Views\MainWindow.xaml">
+            <Generator>MSBuild:Compile</Generator>
+            <XamlRuntime>Wpf</XamlRuntime>
+            <SubType>Designer</SubType>
+        </Page>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0"/>
+        <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12"/>
+        <PackageReference Include="Wacton.Unicolour" Version="6.3.0"/>
+    </ItemGroup>
 
 </Project>

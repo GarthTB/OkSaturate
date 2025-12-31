@@ -1,3 +1,3 @@
-namespace OkSaturate;
+﻿namespace OkSaturate;
 
-public partial class App : System.Windows.Application;
+public sealed partial class App;
