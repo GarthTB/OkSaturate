@@ -68,7 +68,7 @@ internal sealed partial class MainViewModel: ObservableObject
     private double _gainValue;
 
     partial void OnGainValueChanged(double value) {
-        if (!double.TryParse(GainText, out var gain) || Math.Abs(value - gain) > 0.04)
+        if (!double.TryParse(GainText, out var gain) || Math.Abs(value - gain) > 0.02)
             GainText = value.ToString("0.##"); // Slider步长0.04
         _ = UpdatePreviewAsync(false, true);
     }
@@ -164,10 +164,10 @@ internal sealed partial class MainViewModel: ObservableObject
                         token.ThrowIfCancellationRequested();
                         image.ToThumb();
                         token.ThrowIfCancellationRequested();
-                        if (GainValue == 0) {
-                            _dstPreview = await image.ToBitmapSourceAsync(token);
-                            _srcPreview ??= _dstPreview;
-                        } else {
+                        _srcPreview ??= await image.ToBitmapSourceAsync(token);
+                        if (GainValue == 0)
+                            _dstPreview = _srcPreview;
+                        else {
                             var colorSpace = ColorSpaces[SelectedColorSpaceIndex];
                             var saturate = Saturator.Get(colorSpace, GainValue);
                             image.Saturate(saturate, UseMask, null);
