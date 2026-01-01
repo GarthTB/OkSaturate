@@ -34,113 +34,98 @@ internal static class Saver
 
     /// <summary> 根据保存格式名称获取图像文件保存方法 </summary>
     /// <param name="format"> 保存格式名称 </param>
-    /// <returns> 异步图像文件保存方法：输入图像、原始路径、令牌，得到保存的Task </returns>
-    public static Func<Image, string, CancellationToken, Task> Get(string format) =>
+    /// <returns> 图像文件保存方法：输入图像、原始路径，自动存至唯一路径 </returns>
+    public static Action<Image, string> Get(string format) =>
         format switch {
             "BMP 8位RGB" =>
-                static (image, inPath, token) => image.SaveAsBmpAsync(
+                static (image, inPath) => image.SaveAsBmp(
                     GetOutPath(inPath, "bmp"),
-                    new() { BitsPerPixel = BmpBitsPerPixel.Pixel24, SupportTransparency = false },
-                    token),
+                    new() { BitsPerPixel = BmpBitsPerPixel.Pixel24, SupportTransparency = false }),
             "BMP 8位RGBA" =>
-                static (image, inPath, token) => image.SaveAsBmpAsync(
+                static (image, inPath) => image.SaveAsBmp(
                     GetOutPath(inPath, "bmp"),
-                    new() { BitsPerPixel = BmpBitsPerPixel.Pixel32, SupportTransparency = true },
-                    token),
+                    new() { BitsPerPixel = BmpBitsPerPixel.Pixel32, SupportTransparency = true }),
             "JPG 80质量" =>
-                static (image, inPath, token) => image.SaveAsJpegAsync(
+                static (image, inPath) => image.SaveAsJpeg(
                     GetOutPath(inPath, "jpg"),
-                    new() { Quality = 80, ColorType = JpegEncodingColor.YCbCrRatio411 },
-                    token),
+                    new() { Quality = 80, ColorType = JpegEncodingColor.YCbCrRatio411 }),
             "JPG 90质量" =>
-                static (image, inPath, token) => image.SaveAsJpegAsync(
+                static (image, inPath) => image.SaveAsJpeg(
                     GetOutPath(inPath, "jpg"),
-                    new() { Quality = 90, ColorType = JpegEncodingColor.YCbCrRatio411 },
-                    token),
+                    new() { Quality = 90, ColorType = JpegEncodingColor.YCbCrRatio411 }),
             "JPG 99质量" =>
-                static (image, inPath, token) => image.SaveAsJpegAsync(
+                static (image, inPath) => image.SaveAsJpeg(
                     GetOutPath(inPath, "jpg"),
-                    new() { Quality = 99, ColorType = JpegEncodingColor.YCbCrRatio411 },
-                    token),
+                    new() { Quality = 99, ColorType = JpegEncodingColor.YCbCrRatio411 }),
             "JPG 100质量" =>
-                static (image, inPath, token) => image.SaveAsJpegAsync(
+                static (image, inPath) => image.SaveAsJpeg(
                     GetOutPath(inPath, "jpg"),
-                    new() { Quality = 100, ColorType = JpegEncodingColor.YCbCrRatio411 },
-                    token),
+                    new() { Quality = 100, ColorType = JpegEncodingColor.YCbCrRatio411 }),
             "PNG 8位RGB" =>
-                static (image, inPath, token) => image.SaveAsPngAsync(
+                static (image, inPath) => image.SaveAsPng(
                     GetOutPath(inPath, "png"),
                     new() {
                         BitDepth = PngBitDepth.Bit8,
                         ColorType = PngColorType.Rgb,
                         CompressionLevel = PngCompressionLevel.BestCompression
-                    },
-                    token),
+                    }),
             "PNG 8位RGBA" =>
-                static (image, inPath, token) => image.SaveAsPngAsync(
+                static (image, inPath) => image.SaveAsPng(
                     GetOutPath(inPath, "png"),
                     new() {
                         BitDepth = PngBitDepth.Bit8,
                         ColorType = PngColorType.RgbWithAlpha,
                         CompressionLevel = PngCompressionLevel.BestCompression
-                    },
-                    token),
+                    }),
             "PNG 16位RGB" =>
-                static (image, inPath, token) => image.SaveAsPngAsync(
+                static (image, inPath) => image.SaveAsPng(
                     GetOutPath(inPath, "png"),
                     new() {
                         BitDepth = PngBitDepth.Bit16,
                         ColorType = PngColorType.Rgb,
                         CompressionLevel = PngCompressionLevel.BestCompression
-                    },
-                    token),
+                    }),
             "PNG 16位RGBA" =>
-                static (image, inPath, token) => image.SaveAsPngAsync(
+                static (image, inPath) => image.SaveAsPng(
                     GetOutPath(inPath, "png"),
                     new() {
                         BitDepth = PngBitDepth.Bit16,
                         ColorType = PngColorType.RgbWithAlpha,
                         CompressionLevel = PngCompressionLevel.BestCompression
-                    },
-                    token),
+                    }),
             "TIF 8位RGB" =>
-                static (image, inPath, token) => image.SaveAsTiffAsync(
+                static (image, inPath) => image.SaveAsTiff(
                     GetOutPath(inPath, "tif"),
                     new() {
                         BitsPerPixel = TiffBitsPerPixel.Bit24,
                         Compression = TiffCompression.Deflate,
                         CompressionLevel = DeflateCompressionLevel.BestCompression
-                    },
-                    token),
+                    }),
             "TIF 8位RGBA" =>
-                static (image, inPath, token) => image.SaveAsTiffAsync(
+                static (image, inPath) => image.SaveAsTiff(
                     GetOutPath(inPath, "tif"),
                     new() {
                         BitsPerPixel = TiffBitsPerPixel.Bit32,
                         Compression = TiffCompression.Deflate,
                         CompressionLevel = DeflateCompressionLevel.BestCompression
-                    },
-                    token),
-            "TIF 16位RGB" => static (image, inPath, token) => image.SaveAsTiffAsync(
+                    }),
+            "TIF 16位RGB" => static (image, inPath) => image.SaveAsTiff(
                 GetOutPath(inPath, "tif"),
                 new() {
                     BitsPerPixel = TiffBitsPerPixel.Bit48,
                     Compression = TiffCompression.Deflate,
                     CompressionLevel = DeflateCompressionLevel.BestCompression
-                },
-                token),
-            "TIF 16位RGBA" => static (image, inPath, token) => image.SaveAsTiffAsync(
+                }),
+            "TIF 16位RGBA" => static (image, inPath) => image.SaveAsTiff(
                 GetOutPath(inPath, "tif"),
                 new() {
                     BitsPerPixel = TiffBitsPerPixel.Bit64,
                     Compression = TiffCompression.Deflate,
                     CompressionLevel = DeflateCompressionLevel.BestCompression
-                },
-                token),
-            "WebP 无损最小" => static (image, inPath, token) => image.SaveAsWebpAsync(
+                }),
+            "WebP 无损最小" => static (image, inPath) => image.SaveAsWebp(
                 GetOutPath(inPath, "webp"),
-                new() { Quality = 100, FileFormat = WebpFileFormatType.Lossless },
-                token),
+                new() { Quality = 100, FileFormat = WebpFileFormatType.Lossless }),
             _ => throw new ArgumentException($"保存格式'{format}'无效", nameof(format))
         };
 

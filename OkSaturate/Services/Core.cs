@@ -16,10 +16,10 @@ internal static class Core
     /// <param name="image"> 待处理的图像 </param>
     extension(Image image)
     {
-        /// <summary> 缩放为不超过262144像素的小图 </summary>
+        /// <summary> 缩放为不超过129600像素的小图 </summary>
         public void ToThumb() {
             var (w, h) = image.Size;
-            var scale = Math.Sqrt(262144.0 / (w * h));
+            var scale = Math.Sqrt(129600.0 / (w * h));
             if (scale < 1)
                 image.Mutate(context => context.Resize(
                     (int)Math.Round(w * scale),
@@ -56,11 +56,11 @@ internal static class Core
         public void Saturate(
             Func<(double, double, double), (double, double, double)> saturate,
             bool useMask,
-            CancellationToken token) {
+            CancellationToken? token) {
             if (useMask)
                 image.Mutate(context => context.ProcessPixelRowsAsVector4(span => {
                     foreach (ref var px in span) {
-                        token.ThrowIfCancellationRequested();
+                        token?.ThrowIfCancellationRequested();
                         var (r, g, b) = saturate((px.X, px.Y, px.Z));
                         var ratio = GetRatio(px.X, px.Y, px.Z);
                         px.X += (float)(ratio * (r - px.X));
@@ -71,7 +71,7 @@ internal static class Core
             else
                 image.Mutate(context => context.ProcessPixelRowsAsVector4(span => {
                     foreach (ref var px in span) {
-                        token.ThrowIfCancellationRequested();
+                        token?.ThrowIfCancellationRequested();
                         var (r, g, b) = saturate((px.X, px.Y, px.Z));
                         (px.X, px.Y, px.Z) = ((float)r, (float)g, (float)b);
                     }
