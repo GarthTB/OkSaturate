@@ -34,7 +34,7 @@ internal static class Saver
 
     /// <summary> 根据保存格式名称获取图像文件保存方法 </summary>
     /// <param name="format"> 保存格式名称 </param>
-    /// <returns> 图像文件保存方法，输入图像、原始路径、令牌，得到保存的Task </returns>
+    /// <returns> 异步图像文件保存方法：输入图像、原始路径、令牌，得到保存的Task </returns>
     public static Func<Image, string, CancellationToken, Task> Get(string format) =>
         format switch {
             "BMP 8位RGB" =>

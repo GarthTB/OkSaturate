@@ -26,7 +26,7 @@ internal static class Saturator
     /// <summary> 根据色彩空间名称获取饱和度调整方法 </summary>
     /// <param name="colorSpace"> 色彩空间名称 </param>
     /// <param name="gain"> 饱和度增益[-1,1] </param>
-    /// <returns> 饱和度调整方法，输入rgb值[0,1]和增益，得到新的rgb值[0,1] </returns>
+    /// <returns> 饱和度调整方法：输入rgb值[0,1]和增益，得到新的rgb值[0,1] </returns>
     public static Func<(double, double, double), (double, double, double)> Get(
         string colorSpace,
         double gain) =>
@@ -100,10 +100,10 @@ internal static class Saturator
             _ => throw new ArgumentException($"色彩空间'{colorSpace}'无效", nameof(colorSpace))
         };
 
-    /// <summary> 应用饱和度增益 </summary>
+    /// <summary> 调整饱和度 </summary>
     /// <param name="sat"> 饱和度原始值[0,1] </param>
     /// <param name="gain"> 饱和度增益[-1,1] </param>
-    /// <returns> 增益后的饱和度值[0,1] </returns>
+    /// <returns> 调整后的饱和度值[0,1] </returns>
     private static double Gain(double sat, double gain) =>
         gain > 0
             ? Math.Pow(sat, 1 - gain)
