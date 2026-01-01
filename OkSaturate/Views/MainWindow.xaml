@@ -4,9 +4,144 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:OkSaturate.ViewModels"
+    d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
     mc:Ignorable="d"
     Title="Ok Saturate 饱和度工具 v1.2.0"
-    Height="480"
-    Width="1024">
-    <Grid />
+    Height="512"
+    Width="920"
+    FontSize="14"
+    AllowDrop="True"
+    UseLayoutRounding="True">
+    <Window.DataContext>
+        <vm:MainViewModel />
+    </Window.DataContext>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="256" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Grid Margin="12,11">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30" />
+                <RowDefinition Height="10" />
+                <RowDefinition />
+                <RowDefinition Height="10" />
+                <RowDefinition Height="30" />
+                <RowDefinition Height="10" />
+                <RowDefinition Height="30" />
+                <RowDefinition Height="10" />
+                <RowDefinition Height="30" />
+                <RowDefinition Height="10" />
+                <RowDefinition Height="30" />
+                <RowDefinition Height="10" />
+                <RowDefinition Height="30" />
+            </Grid.RowDefinitions>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Button Command="{Binding AddPathCommand}" Content="添加图像" />
+                <Button
+                    Grid.Column="2"
+                    Command="{Binding RemovePathCommand}"
+                    Content="移除图像" />
+            </Grid>
+            <ListBox
+                Grid.Row="2"
+                Drop="ListBox_Drop"
+                ItemsSource="{Binding ImagePaths}"
+                SelectedIndex="{Binding SelectedPathIndex}"
+                ToolTip="可以将图像拽进来&#x0a;选中图像以查看预览" />
+            <Grid Grid.Row="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="72" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Label
+                    VerticalContentAlignment="Center"
+                    Content="色彩空间"
+                    Padding="2,0,0,0" />
+                <ComboBox
+                    Grid.Column="1"
+                    VerticalContentAlignment="Center"
+                    ItemsSource="{Binding ColourSpaces}"
+                    Padding="8,0"
+                    SelectedIndex="{Binding SelectedColourSpaceIndex}" />
+            </Grid>
+            <Grid Grid.Row="6">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="58" />
+                    <ColumnDefinition Width="52" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <CheckBox
+                    VerticalContentAlignment="Center"
+                    Content="蒙版"
+                    IsChecked="{Binding UseMask}"
+                    Padding="9,0,0,0"
+                    ToolTip="使用蒙版以避免高饱和度区域溢出" />
+                <Label
+                    Grid.Column="1"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    Content="增益"
+                    Padding="0" />
+                <TextBox
+                    Grid.Column="2"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    MaxLength="10"
+                    Text="{Binding GainText, UpdateSourceTrigger=PropertyChanged}"
+                    ToolTip="范围[-1,1]" />
+            </Grid>
+            <Slider
+                Grid.Row="8"
+                VerticalAlignment="Center"
+                Value="{Binding GainValue}"
+                IsSnapToTickEnabled="True"
+                LargeChange="0.1"
+                Maximum="1"
+                Minimum="-1"
+                SmallChange="0.04"
+                TickFrequency="0.04"
+                TickPlacement="TopLeft" />
+            <Grid Grid.Row="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="72" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Label
+                    VerticalContentAlignment="Center"
+                    Content="保存格式"
+                    Padding="2,0,0,0" />
+                <ComboBox
+                    Grid.Column="1"
+                    VerticalContentAlignment="Center"
+                    ItemsSource="{Binding SaveFormats}"
+                    Padding="8,0"
+                    SelectedIndex="{Binding SelectedSaveFormatIndex}" />
+            </Grid>
+            <Grid Grid.Row="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="96" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <CheckBox
+                    VerticalContentAlignment="Center"
+                    Content="切换预览"
+                    IsChecked="{Binding PreviewDst}"
+                    Padding="9,0,0,0"
+                    ToolTip="切换选中图像的修改前后预览&#x0a;勾选时显示修改后，不勾选时显示修改前" />
+                <Button
+                    Grid.Column="1"
+                    Command="{Binding ProcessCommand}"
+                    Content="开始执行"
+                    ToolTip="结果将保存至原始图像所在的目录；无覆盖风险" />
+            </Grid>
+        </Grid>
+        <Image Grid.Column="1" Source="{Binding PreviewImage}" />
+    </Grid>
 </Window>
