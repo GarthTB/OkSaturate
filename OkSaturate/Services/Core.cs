@@ -10,7 +10,7 @@ using SixLabors.ImageSharp.Processing;
 internal static class Core
 {
     /// <summary> 计算当前像素的饱和度调整比例 </summary>
-    private static double GetRatio(float r, float g, float b) =>
+    private static float GetRatio(float r, float g, float b) =>
         2 * MathF.Min(MathF.Min(MathF.Min(MathF.Min(MathF.Min(r, g), b), 1 - r), 1 - g), 1 - b);
 
     /// <param name="image"> 待处理的图像 </param>
@@ -61,11 +61,11 @@ internal static class Core
                 image.Mutate(context => context.ProcessPixelRowsAsVector4(span => {
                     foreach (ref var px in span) {
                         token?.ThrowIfCancellationRequested();
+                        var ratio = MathF.Sqrt(GetRatio(px.X, px.Y, px.Z));
                         var (r, g, b) = saturate((px.X, px.Y, px.Z));
-                        var ratio = GetRatio(px.X, px.Y, px.Z);
-                        px.X += (float)(ratio * (r - px.X));
-                        px.Y += (float)(ratio * (g - px.Y));
-                        px.Z += (float)(ratio * (b - px.Z));
+                        px.X += ratio * ((float)r - px.X);
+                        px.Y += ratio * ((float)g - px.Y);
+                        px.Z += ratio * ((float)b - px.Z);
                     }
                 }));
             else

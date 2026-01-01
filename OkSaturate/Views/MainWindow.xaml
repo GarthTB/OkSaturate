@@ -18,10 +18,11 @@
     </Window.DataContext>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="256" />
             <ColumnDefinition />
+            <ColumnDefinition Width="256" />
         </Grid.ColumnDefinitions>
-        <Grid Margin="12,11">
+        <Image Source="{Binding PreviewImage}" />
+        <Grid Grid.Column="1" Margin="12,11">
             <Grid.RowDefinitions>
                 <RowDefinition Height="30" />
                 <RowDefinition Height="10" />
@@ -54,7 +55,7 @@
                 Drop="ListBox_Drop"
                 ItemsSource="{Binding ImagePaths}"
                 SelectedIndex="{Binding SelectedPathIndex}"
-                ToolTip="可以将图像拽进来&#x0a;选中图像以查看预览" />
+                ToolTip="可以将图像拽进来；选中图像以查看预览" />
             <Grid Grid.Row="4">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="72" />
@@ -81,8 +82,8 @@
                     VerticalContentAlignment="Center"
                     Content="蒙版"
                     IsChecked="{Binding UseMask}"
-                    Padding="9,0,0,0"
-                    ToolTip="使用蒙版以避免高饱和度区域溢出" />
+                    Padding="10,0,0,0"
+                    ToolTip="使用蒙版以避免鲜艳的像素值溢出" />
                 <Label
                     Grid.Column="1"
                     HorizontalContentAlignment="Center"
@@ -126,15 +127,15 @@
             </Grid>
             <Grid Grid.Row="12">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="96" />
+                    <ColumnDefinition Width="98" />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
                 <CheckBox
                     VerticalContentAlignment="Center"
                     Content="切换预览"
                     IsChecked="{Binding PreviewDst}"
-                    Padding="9,0,0,0"
-                    ToolTip="切换选中图像的修改前后预览&#x0a;勾选时显示修改后，不勾选时显示修改前" />
+                    Padding="10,0,0,0"
+                    ToolTip="切换修改前后预览：勾选为修改后，不勾选为修改前" />
                 <Button
                     Grid.Column="1"
                     Command="{Binding ProcessCommand}"
@@ -142,6 +143,5 @@
                     ToolTip="结果将保存至原始图像所在的目录；无覆盖风险" />
             </Grid>
         </Grid>
-        <Image Grid.Column="1" Source="{Binding PreviewImage}" />
     </Grid>
 </Window>
