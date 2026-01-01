@@ -1,6 +1,6 @@
 # 🎨 Ok Saturate | 饱和度工具 🖌
 
-`Ok Saturate` 是一款 Windows 单平台的 GUI 应用程序，
+`Ok Saturate` 是一款 Windows x64 单平台的 GUI 应用程序，
 用于在多种色彩空间（包括Oklch、JzCzHz、HCT等）中调整图像的
 饱和度（色度、纯度、彩度），并提供像素值蒙版来避免高饱和度区域溢出，
 以求相较于传统 HSV/HSL 更均衡、更安全、更符合感知的调整效果。
@@ -31,7 +31,7 @@
 ### 使用步骤
 
 1. 下载 [最新版本压缩包](https://github.com/GarthTB/OkSaturate/releases/latest)
-2. 解压后运行 `Ok Saturate.exe`
+2. 解压后运行 `OkSaturate.exe`
 3. 添加图像，调整参数、预览效果，执行处理
 
 ## 🛠 技术栈
@@ -51,9 +51,8 @@
 
 ## 💡 补充说明
 
-- 底层运算精度：16位
+- 底层运算精度：32位
 - 不保证严格的色彩科学性，请勿用于科学研究
-- 已验证支持的输入图像：sRGB，8位/16位，RGB/RGBA，常见格式
 
 ## 📝 更新日志
 
