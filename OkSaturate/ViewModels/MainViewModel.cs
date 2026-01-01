@@ -10,6 +10,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using Services;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using Strategies;
 
 /// <summary> 主窗口的ViewModel </summary>
@@ -24,9 +25,9 @@ internal sealed partial class MainViewModel: ObservableObject
     [ObservableProperty, NotifyCanExecuteChangedFor(nameof(RemovePathCommand))]
     private int _selectedPathIndex = -1;
 
-    partial void OnSelectedPathIndexChanged(int value) => _ = UpdatePreviewAsync(true, true);
+    partial void OnSelectedPathIndexChanged(int value) => _ = UpdatePreviewAsync(true);
 
-    /// <returns> 是否选中了待处理图像路径 </returns>
+    /// <returns> 是否选中了图像路径 </returns>
     private bool PathSelected => SelectedPathIndex >= 0 && SelectedPathIndex < ImagePaths.Count;
 
     /// <summary> 添加待处理图像路径 </summary>
@@ -48,7 +49,7 @@ internal sealed partial class MainViewModel: ObservableObject
                 ProcessCommand.NotifyCanExecuteChanged();
             });
 
-    /// <summary> 移除选中的待处理图像路径 </summary>
+    /// <summary> 移除选中的图像路径 </summary>
     [RelayCommand(CanExecute = nameof(PathSelected))]
     private void RemovePath() =>
         Try.Do(
@@ -70,7 +71,7 @@ internal sealed partial class MainViewModel: ObservableObject
     partial void OnGainValueChanged(double value) {
         if (!double.TryParse(GainText, out var gain) || Math.Abs(value - gain) > 0.025)
             GainText = value.ToString("0.##"); // Slider步长0.05
-        _ = UpdatePreviewAsync(false, true);
+        _ = UpdatePreviewAsync(false);
     }
 
     /// <summary> 增益值文本 </summary>
@@ -90,7 +91,7 @@ internal sealed partial class MainViewModel: ObservableObject
     [ObservableProperty]
     private bool _useMask = true;
 
-    partial void OnUseMaskChanged(bool value) => _ = UpdatePreviewAsync(false, true);
+    partial void OnUseMaskChanged(bool value) => _ = UpdatePreviewAsync(false);
 
     /// <summary> 所有可用色彩空间的名称 </summary>
     public string[] ColorSpaces { get; } = Saturator.ColorSpaces;
@@ -99,8 +100,7 @@ internal sealed partial class MainViewModel: ObservableObject
     [ObservableProperty]
     private byte _selectedColorSpaceIndex;
 
-    partial void OnSelectedColorSpaceIndexChanged(byte value) =>
-        _ = UpdatePreviewAsync(false, true);
+    partial void OnSelectedColorSpaceIndexChanged(byte value) => _ = UpdatePreviewAsync(false);
 
     /// <summary> 所有可用保存策略的名称 </summary>
     public string[] SaveFormats { get; } = Saver.Formats;
@@ -113,14 +113,14 @@ internal sealed partial class MainViewModel: ObservableObject
 
     #region 刷新预览
 
-    /// <summary> 异步预览的令牌源 </summary>
-    private CancellationTokenSource _cts = new();
-
     /// <summary> true预览修改后的，false预览修改前的 </summary>
     [ObservableProperty]
     private bool _previewDst = true;
 
-    partial void OnPreviewDstChanged(bool value) => _ = UpdatePreviewAsync(false, false);
+    partial void OnPreviewDstChanged(bool value) => _ = UpdatePreviewAsync(null);
+
+    /// <summary> 选中图像（已载入并缩小） </summary>
+    private Image? _srcImage;
 
     /// <summary> 选中图像的修改前后预览 </summary>
     private BitmapSource? _srcPreview, _dstPreview;
@@ -129,58 +129,61 @@ internal sealed partial class MainViewModel: ObservableObject
     [ObservableProperty]
     private BitmapSource? _previewImage;
 
+    /// <summary> 异步预览的令牌源 </summary>
+    private CancellationTokenSource _cts = new();
+
     /// <summary> 打断并刷新预览 </summary>
-    private Task UpdatePreviewAsync(bool srcChanged, bool dstChanged) =>
+    /// <param name="srcChanged"> 换文件true，仅调参false，仅切换null </param>
+    private Task UpdatePreviewAsync(bool? srcChanged) =>
         Try.DoAsync(
             "刷新预览",
             async () => {
-                await _cts.CancelAsync();
-                _cts.Dispose();
-                var token = (_cts = new()).Token;
-
-                if (srcChanged)
-                    _srcPreview = null;
-                if (dstChanged)
-                    _dstPreview = null;
-                if (!PathSelected) { // 没选中，不预览
-                    PreviewImage = null;
-                    return;
-                }
-
-                if (!PreviewDst && _srcPreview is null) { // 修改前预览
-                    await Task.Delay(64, token).ConfigureAwait(true); // 防抖
-                    using var image = await Image.LoadAsync(ImagePaths[SelectedPathIndex], token);
-                    token.ThrowIfCancellationRequested();
-                    image.ToThumb();
-                    token.ThrowIfCancellationRequested();
-                    _srcPreview = await image.ToBitmapSourceAsync(token);
-                } else if (PreviewDst && _dstPreview is null) { // 修改后预览
-                    if (GainValue == 0 && _srcPreview is {})
-                        _dstPreview = _srcPreview;
-                    else {
-                        await Task.Delay(64, token).ConfigureAwait(true); // 防抖
-                        var path = ImagePaths[SelectedPathIndex];
-                        using var image = await Image.LoadAsync(path, token);
-                        token.ThrowIfCancellationRequested();
-                        image.ToThumb();
-                        token.ThrowIfCancellationRequested();
-                        _srcPreview ??= await image.ToBitmapSourceAsync(token);
-                        if (GainValue == 0)
-                            _dstPreview = _srcPreview;
-                        else {
-                            var colorSpace = ColorSpaces[SelectedColorSpaceIndex];
-                            var saturate = Saturator.Get(colorSpace, GainValue);
-                            image.Saturate(saturate, UseMask, null);
-                            token.ThrowIfCancellationRequested();
-                            _dstPreview = await image.ToBitmapSourceAsync(token);
+                if (srcChanged is {} changed) {
+                    if (!changed) // 仅调参
+                        _dstPreview = null;
+                    else { // 换文件
+                        _srcPreview = _dstPreview = null;
+                        if (!PathSelected) { // 取消选中图像
+                            _srcImage = null;
+                            return;
                         }
                     }
+                    await GenPreview();
                 }
-
                 PreviewImage = PreviewDst
                     ? _dstPreview
                     : _srcPreview;
             });
+
+    /// <summary> 从_srcImage生成预览图像 </summary>
+    private async Task GenPreview() {
+        await _cts.CancelAsync();
+        _cts.Dispose();
+        var token = (_cts = new()).Token;
+        await Task.Delay(128, _cts.Token).ConfigureAwait(true); // 防抖
+
+        if (_srcImage is null) {
+            token.ThrowIfCancellationRequested();
+            _srcImage = await Image.LoadAsync(ImagePaths[SelectedPathIndex], token);
+            token.ThrowIfCancellationRequested();
+            _srcImage.ToThumb();
+        }
+
+        token.ThrowIfCancellationRequested();
+        _srcPreview ??= await _srcImage.ToBitmapSourceAsync(token);
+
+        if (GainValue == 0)
+            _dstPreview ??= _srcPreview;
+        else {
+            token.ThrowIfCancellationRequested();
+            using var dst = _srcImage.CloneAs<Rgba32>();
+            token.ThrowIfCancellationRequested();
+            var saturate = Saturator.Get(ColorSpaces[SelectedColorSpaceIndex], GainValue);
+            dst.Saturate(saturate, UseMask, token);
+            token.ThrowIfCancellationRequested();
+            _dstPreview ??= await dst.ToBitmapSourceAsync(token);
+        }
+    }
 
     #endregion
 
@@ -206,7 +209,7 @@ internal sealed partial class MainViewModel: ObservableObject
                         image.Saturate(saturate, UseMask, null);
                         save(image, path);
                     } catch (Exception ex) {
-                        issues.Add($"{path} 出错：\n{ex.Message}");
+                        issues.Add($"{path}出错：\n{ex.Message}");
                     }
                 if (issues.Count > 1)
                     throw new AggregateException(string.Join('\n', issues));
