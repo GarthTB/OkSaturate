@@ -16,10 +16,10 @@ internal static class Core
     /// <param name="image"> 待处理的图像 </param>
     extension(Image image)
     {
-        /// <summary> 缩放为不超过65536像素的小图 </summary>
+        /// <summary> 缩放为不超过102400像素的小图 </summary>
         public void ToThumb() {
             var (w, h) = image.Size;
-            var scale = Math.Sqrt(65536.0 / (w * h));
+            var scale = Math.Sqrt(102400.0 / w / h);
             if (scale < 1)
                 image.Mutate(context => context.Resize(
                     (int)Math.Round(w * scale),
