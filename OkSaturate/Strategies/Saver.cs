@@ -23,14 +23,16 @@ internal static class Saver
         "JPG 100质量",
         "PNG 8位RGB",
         "PNG 8位RGBA",
-        "PNG 16位RGB",
-        "PNG 16位RGBA",
         "TIF 8位RGB",
         "TIF 8位RGBA",
         "WebP 无损最小"
 
-        // "TIF 16位RGB",
-        // "TIF 16位RGBA",
+        /* 暂未支持的格式：
+        "PNG 16位RGB",
+        "PNG 16位RGBA",
+        "TIF 16位RGB",
+        "TIF 16位RGBA"
+        */
     ];
 
     /// <summary> 根据保存格式名称获取图像文件保存方法 </summary>
@@ -78,22 +80,6 @@ internal static class Saver
                         ColorType = PngColorType.RgbWithAlpha,
                         CompressionLevel = PngCompressionLevel.BestCompression
                     }),
-            "PNG 16位RGB" =>
-                static (image, inPath) => image.SaveAsPng(
-                    GetOutPath(inPath, "png"),
-                    new() {
-                        BitDepth = PngBitDepth.Bit16,
-                        ColorType = PngColorType.Rgb,
-                        CompressionLevel = PngCompressionLevel.BestCompression
-                    }),
-            "PNG 16位RGBA" =>
-                static (image, inPath) => image.SaveAsPng(
-                    GetOutPath(inPath, "png"),
-                    new() {
-                        BitDepth = PngBitDepth.Bit16,
-                        ColorType = PngColorType.RgbWithAlpha,
-                        CompressionLevel = PngCompressionLevel.BestCompression
-                    }),
             "TIF 8位RGB" => static (image, inPath) => image.SaveAsTiff(
                 GetOutPath(inPath, "tif"),
                 new() {
@@ -113,20 +99,37 @@ internal static class Saver
                 new() { Quality = 100, FileFormat = WebpFileFormatType.Lossless }),
             _ => throw new ArgumentException($"保存格式'{format}'无效", nameof(format))
 
-            // "TIF 16位RGB" => static (image, inPath) => image.SaveAsTiff(
-            //     GetOutPath(inPath, "tif"),
-            //     new() {
-            //         BitsPerPixel = TiffBitsPerPixel.Bit48, 未支持
-            //         Compression = TiffCompression.Deflate,
-            //         CompressionLevel = DeflateCompressionLevel.BestCompression
-            //     }),
-            // "TIF 16位RGBA" => static (image, inPath) => image.SaveAsTiff(
-            //     GetOutPath(inPath, "tif"),
-            //     new() {
-            //         BitsPerPixel = TiffBitsPerPixel.Bit64, 未支持
-            //         Compression = TiffCompression.Deflate,
-            //         CompressionLevel = DeflateCompressionLevel.BestCompression
-            //     }),
+            /* 暂未支持的格式：
+             "PNG 16位RGB" =>
+                static (image, inPath) => image.SaveAsPng(
+                    GetOutPath(inPath, "png"),
+                    new() {
+                        BitDepth = PngBitDepth.Bit16,
+                        ColorType = PngColorType.Rgb,
+                        CompressionLevel = PngCompressionLevel.BestCompression
+                    }),
+            "PNG 16位RGBA" => static (image, inPath) => image.SaveAsPng(
+                GetOutPath(inPath, "png"),
+                new() {
+                    BitDepth = PngBitDepth.Bit16,
+                    ColorType = PngColorType.RgbWithAlpha,
+                    CompressionLevel = PngCompressionLevel.BestCompression
+                }),
+            "TIF 16位RGB" => static (image, inPath) => image.SaveAsTiff(
+                GetOutPath(inPath, "tif"),
+                new() {
+                    BitsPerPixel = TiffBitsPerPixel.Bit48,
+                    Compression = TiffCompression.Deflate,
+                    CompressionLevel = DeflateCompressionLevel.BestCompression
+                }),
+            "TIF 16位RGBA" => static (image, inPath) => image.SaveAsTiff(
+                GetOutPath(inPath, "tif"),
+                new() {
+                    BitsPerPixel = TiffBitsPerPixel.Bit64,
+                    Compression = TiffCompression.Deflate,
+                    CompressionLevel = DeflateCompressionLevel.BestCompression
+                })
+            */
         };
 
     /// <summary> 获取输出路径 </summary>
