@@ -148,7 +148,7 @@ internal sealed partial class MainViewModel: ObservableObject
                 }
 
                 if (!PreviewDst && _srcPreview is null) { // 修改前预览
-                    await Task.Delay(128, token).ConfigureAwait(true); // 防抖
+                    await Task.Delay(64, token).ConfigureAwait(true); // 防抖
                     using var image = await Image.LoadAsync(ImagePaths[SelectedPathIndex], token);
                     token.ThrowIfCancellationRequested();
                     image.ToThumb();
@@ -158,7 +158,7 @@ internal sealed partial class MainViewModel: ObservableObject
                     if (GainValue == 0 && _srcPreview is {})
                         _dstPreview = _srcPreview;
                     else {
-                        await Task.Delay(128, token).ConfigureAwait(true); // 防抖
+                        await Task.Delay(64, token).ConfigureAwait(true); // 防抖
                         var path = ImagePaths[SelectedPathIndex];
                         using var image = await Image.LoadAsync(path, token);
                         token.ThrowIfCancellationRequested();

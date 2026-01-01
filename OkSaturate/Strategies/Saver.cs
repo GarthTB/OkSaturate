@@ -27,9 +27,10 @@ internal static class Saver
         "PNG 16位RGBA",
         "TIF 8位RGB",
         "TIF 8位RGBA",
-        "TIF 16位RGB",
-        "TIF 16位RGBA",
         "WebP 无损最小"
+
+        // "TIF 16位RGB",
+        // "TIF 16位RGBA",
     ];
 
     /// <summary> 根据保存格式名称获取图像文件保存方法 </summary>
@@ -93,33 +94,17 @@ internal static class Saver
                         ColorType = PngColorType.RgbWithAlpha,
                         CompressionLevel = PngCompressionLevel.BestCompression
                     }),
-            "TIF 8位RGB" =>
-                static (image, inPath) => image.SaveAsTiff(
-                    GetOutPath(inPath, "tif"),
-                    new() {
-                        BitsPerPixel = TiffBitsPerPixel.Bit24,
-                        Compression = TiffCompression.Deflate,
-                        CompressionLevel = DeflateCompressionLevel.BestCompression
-                    }),
-            "TIF 8位RGBA" =>
-                static (image, inPath) => image.SaveAsTiff(
-                    GetOutPath(inPath, "tif"),
-                    new() {
-                        BitsPerPixel = TiffBitsPerPixel.Bit32,
-                        Compression = TiffCompression.Deflate,
-                        CompressionLevel = DeflateCompressionLevel.BestCompression
-                    }),
-            "TIF 16位RGB" => static (image, inPath) => image.SaveAsTiff(
+            "TIF 8位RGB" => static (image, inPath) => image.SaveAsTiff(
                 GetOutPath(inPath, "tif"),
                 new() {
-                    BitsPerPixel = TiffBitsPerPixel.Bit48,
+                    BitsPerPixel = TiffBitsPerPixel.Bit24,
                     Compression = TiffCompression.Deflate,
                     CompressionLevel = DeflateCompressionLevel.BestCompression
                 }),
-            "TIF 16位RGBA" => static (image, inPath) => image.SaveAsTiff(
+            "TIF 8位RGBA" => static (image, inPath) => image.SaveAsTiff(
                 GetOutPath(inPath, "tif"),
                 new() {
-                    BitsPerPixel = TiffBitsPerPixel.Bit64,
+                    BitsPerPixel = TiffBitsPerPixel.Bit32,
                     Compression = TiffCompression.Deflate,
                     CompressionLevel = DeflateCompressionLevel.BestCompression
                 }),
@@ -127,6 +112,21 @@ internal static class Saver
                 GetOutPath(inPath, "webp"),
                 new() { Quality = 100, FileFormat = WebpFileFormatType.Lossless }),
             _ => throw new ArgumentException($"保存格式'{format}'无效", nameof(format))
+
+            // "TIF 16位RGB" => static (image, inPath) => image.SaveAsTiff(
+            //     GetOutPath(inPath, "tif"),
+            //     new() {
+            //         BitsPerPixel = TiffBitsPerPixel.Bit48, 未支持
+            //         Compression = TiffCompression.Deflate,
+            //         CompressionLevel = DeflateCompressionLevel.BestCompression
+            //     }),
+            // "TIF 16位RGBA" => static (image, inPath) => image.SaveAsTiff(
+            //     GetOutPath(inPath, "tif"),
+            //     new() {
+            //         BitsPerPixel = TiffBitsPerPixel.Bit64, 未支持
+            //         Compression = TiffCompression.Deflate,
+            //         CompressionLevel = DeflateCompressionLevel.BestCompression
+            //     }),
         };
 
     /// <summary> 获取输出路径 </summary>
