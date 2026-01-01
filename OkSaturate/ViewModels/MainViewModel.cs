@@ -68,8 +68,8 @@ internal sealed partial class MainViewModel: ObservableObject
     private double _gainValue;
 
     partial void OnGainValueChanged(double value) {
-        if (!double.TryParse(GainText, out var gain) || Math.Abs(value - gain) > 0.02)
-            GainText = value.ToString("0.##"); // Slider步长0.04
+        if (!double.TryParse(GainText, out var gain) || Math.Abs(value - gain) > 0.025)
+            GainText = value.ToString("0.##"); // Slider步长0.05
         _ = UpdatePreviewAsync(false, true);
     }
 

@@ -68,7 +68,7 @@
                     Grid.Column="1"
                     VerticalContentAlignment="Center"
                     ItemsSource="{Binding ColorSpaces}"
-                    Padding="8,0"
+                    Padding="10,0"
                     SelectedIndex="{Binding SelectedColorSpaceIndex}" />
             </Grid>
             <Grid Grid.Row="6">
@@ -105,8 +105,8 @@
                 LargeChange="0.1"
                 Maximum="1"
                 Minimum="-1"
-                SmallChange="0.04"
-                TickFrequency="0.04"
+                SmallChange="0.05"
+                TickFrequency="0.05"
                 TickPlacement="TopLeft" />
             <Grid Grid.Row="10">
                 <Grid.ColumnDefinitions>
@@ -121,7 +121,7 @@
                     Grid.Column="1"
                     VerticalContentAlignment="Center"
                     ItemsSource="{Binding SaveFormats}"
-                    Padding="8,0"
+                    Padding="10,0"
                     SelectedIndex="{Binding SelectedSaveFormatIndex}" />
             </Grid>
             <Grid Grid.Row="12">
