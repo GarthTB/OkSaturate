@@ -7,7 +7,7 @@
     xmlns:vm="clr-namespace:OkSaturate.ViewModels"
     d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
     mc:Ignorable="d"
-    Title="Ok Saturate 饱和度工具 v1.2.0"
+    Title="Ok Saturate 饱和度工具 v1.3.0"
     Height="512"
     Width="920"
     FontSize="14"

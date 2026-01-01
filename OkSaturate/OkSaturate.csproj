@@ -7,15 +7,15 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <UseWPF>true</UseWPF>
         <ApplicationIcon>icon.ico</ApplicationIcon>
-        <Version>1.2.0</Version>
+        <Version>1.3.0</Version>
         <Title>Ok Saturate</Title>
-        <Authors>Garth TB &lt;g-art-h@outlook.com&gt;</Authors>
+        <Authors>Garth TB | 天卜 &lt;g-art-h@outlook.com&gt;</Authors>
         <Description>🎨 A Windows GUI application for adjusting image saturation in multiple color spaces | 用于在多种色彩空间中调整图像饱和度的 Windows GUI 应用程序 🖌</Description>
         <Copyright>Copyright (c) 2026 Garth TB | 天卜</Copyright>
         <PackageProjectUrl>https://github.com/GarthTB/OkSaturate</PackageProjectUrl>
         <PackageLicenseUrl>https://mit-license.org/</PackageLicenseUrl>
         <PackageIcon>icon.png</PackageIcon>
-        <Company>Garth TB &lt;g-art-h@outlook.com&gt;</Company>
+        <Company>Garth TB | 天卜 &lt;g-art-h@outlook.com&gt;</Company>
         <Product>Ok Saturate</Product>
     </PropertyGroup>
 
