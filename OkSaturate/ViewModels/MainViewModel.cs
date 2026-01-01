@@ -93,13 +93,13 @@ internal sealed partial class MainViewModel: ObservableObject
     partial void OnUseMaskChanged(bool value) => _ = UpdatePreviewAsync(false, true);
 
     /// <summary> 所有可用色彩空间的名称 </summary>
-    public string[] ColourSpaces { get; } = Saturator.ColorSpaces;
+    public string[] ColorSpaces { get; } = Saturator.ColorSpaces;
 
     /// <summary> 当前选择的色彩空间的索引 </summary>
     [ObservableProperty]
-    private byte _selectedColourSpaceIndex;
+    private byte _selectedColorSpaceIndex;
 
-    partial void OnSelectedColourSpaceIndexChanged(byte value) =>
+    partial void OnSelectedColorSpaceIndexChanged(byte value) =>
         _ = UpdatePreviewAsync(false, true);
 
     /// <summary> 所有可用保存策略的名称 </summary>
@@ -142,30 +142,39 @@ internal sealed partial class MainViewModel: ObservableObject
                     _srcPreview = null;
                 if (dstChanged)
                     _dstPreview = null;
-                if (!PathSelected) // 没选中，不预览
-                {
+                if (!PathSelected) { // 没选中，不预览
                     PreviewImage = null;
                     return;
                 }
 
-                var path = ImagePaths[SelectedPathIndex];
-                if ((!PreviewDst && _srcPreview is null) || (PreviewDst && GainValue == 0)) // 修改前预览
-                {
-                    using var image = await Image.LoadAsync(path, token);
+                if (!PreviewDst && _srcPreview is null) { // 修改前预览
+                    await Task.Delay(128, token).ConfigureAwait(true); // 防抖
+                    using var image = await Image.LoadAsync(ImagePaths[SelectedPathIndex], token);
                     token.ThrowIfCancellationRequested();
                     image.ToThumb();
                     token.ThrowIfCancellationRequested();
                     _srcPreview = await image.ToBitmapSourceAsync(token);
-                } else if (PreviewDst && _dstPreview is null) // 修改后预览
-                {
-                    using var image = await Image.LoadAsync(path, token);
-                    token.ThrowIfCancellationRequested();
-                    image.ToThumb();
-                    token.ThrowIfCancellationRequested();
-                    var saturate = Saturator.Get(ColourSpaces[SelectedColourSpaceIndex], GainValue);
-                    image.Saturate(saturate, UseMask, null);
-                    token.ThrowIfCancellationRequested();
-                    _dstPreview = await image.ToBitmapSourceAsync(token);
+                } else if (PreviewDst && _dstPreview is null) { // 修改后预览
+                    if (GainValue == 0 && _srcPreview is {})
+                        _dstPreview = _srcPreview;
+                    else {
+                        await Task.Delay(128, token).ConfigureAwait(true); // 防抖
+                        var path = ImagePaths[SelectedPathIndex];
+                        using var image = await Image.LoadAsync(path, token);
+                        token.ThrowIfCancellationRequested();
+                        image.ToThumb();
+                        token.ThrowIfCancellationRequested();
+                        if (GainValue == 0) {
+                            _dstPreview = await image.ToBitmapSourceAsync(token);
+                            _srcPreview ??= _dstPreview;
+                        } else {
+                            var colorSpace = ColorSpaces[SelectedColorSpaceIndex];
+                            var saturate = Saturator.Get(colorSpace, GainValue);
+                            image.Saturate(saturate, UseMask, null);
+                            token.ThrowIfCancellationRequested();
+                            _dstPreview = await image.ToBitmapSourceAsync(token);
+                        }
+                    }
                 }
 
                 PreviewImage = PreviewDst
@@ -187,27 +196,26 @@ internal sealed partial class MainViewModel: ObservableObject
             "执行处理",
             () => {
                 _ = _cts.CancelAsync();
-                var saturate = Saturator.Get(ColourSpaces[SelectedColourSpaceIndex], GainValue);
+                var saturate = Saturator.Get(ColorSpaces[SelectedColorSpaceIndex], GainValue);
                 var save = Saver.Get(SaveFormats[SelectedSaveFormatIndex]);
-                List<string> issues = ["以下文件处理出错："];
 
+                List<string> issues = ["以下文件处理出错："];
                 foreach (var path in ImagePaths)
                     try {
                         using var image = Image.Load(path);
                         image.Saturate(saturate, UseMask, null);
                         save(image, path);
-                    } catch (Exception ex) when (ex is not OperationCanceledException) {
+                    } catch (Exception ex) {
                         issues.Add($"{path} 出错：\n{ex.Message}");
                     }
-
-                if (issues.Count == 1)
-                    _ = MessageBox.Show(
-                        "所有图像处理完成！",
-                        "成功",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Information);
-                else
+                if (issues.Count > 1)
                     throw new AggregateException(string.Join('\n', issues));
+
+                _ = MessageBox.Show(
+                    "所有图像处理完成！",
+                    "成功",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
             });
 
     #endregion

@@ -67,9 +67,9 @@
                 <ComboBox
                     Grid.Column="1"
                     VerticalContentAlignment="Center"
-                    ItemsSource="{Binding ColourSpaces}"
+                    ItemsSource="{Binding ColorSpaces}"
                     Padding="8,0"
-                    SelectedIndex="{Binding SelectedColourSpaceIndex}" />
+                    SelectedIndex="{Binding SelectedColorSpaceIndex}" />
             </Grid>
             <Grid Grid.Row="6">
                 <Grid.ColumnDefinitions>
